@@ -1,5 +1,12 @@
 angular.module('core', ['firebase', 'myApp.config'])
     .factory('localFb', function (config, fbutil, $q, model, snippet) {
+        var localFb={
+            load:load,
+            update:update,
+            set:set,
+            push:push
+        };
+
         function goOnline_IfAllOffline(refUrl, t){
             var fbObj=new snippet.FbObj(refUrl);
             if(model.db[fbObj.dbType].online.length==0){Firebase.goOnline(fbObj.dbUrl)}
@@ -122,11 +129,6 @@ angular.module('core', ['firebase', 'myApp.config'])
             })
         }
 //TODO: Transaction
-        var localFb={
-            load:load,
-            update:update,
-            set:set,
-            push:push
-        };
+
         return localFb
     });
