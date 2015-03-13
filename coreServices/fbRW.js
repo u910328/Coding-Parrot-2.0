@@ -1,32 +1,50 @@
 angular.module('core', ['firebase', 'myApp.config'])
-    .factory('fbIO', function (config, fbutil, $q, fbStructure, data, snippet) {
-        function FbObj(refUrl){                                  //TODO: 移至snippet
-            this.dbName=data.db[refUrl.split("@")[1]].dbName;
-            this.dbUrl="https://"+dbName+".firebaseio.com/";
-            this.path=refUrl.split("@")[0];
-            this.url= this.dbUrl+this.path;
-            this.t=(new Date).getTime().toString;
-            this.dbType=refUrl.split("@")[1];
-        }
+    .factory('fbRW', function (config, fbutil, $q, localFb, model, snippet) {
         function goOnline_IfAllOffline(refUrl, t){
-            var fbObj=new FbObj(refUrl);
-            if(data.db[fbObj.dbType].online.length==0){Firebase.goOnline(fbObj.dbUrl)}
-            data.db[fbObj.dbType].online.push(t);
+            var fbObj=new snippet.FbObj(refUrl);
+            if(model.db[fbObj.dbType].online.length==0){Firebase.goOnline(fbObj.dbUrl)}
+            model.db[fbObj.dbType].online.push(t);
         }
         function goOffline_IfLastOnline(refUrl, t){           //TODO: 檢驗是否跟其他的讀寫操作衝突
-            var fbObj=new FbObj(refUrl);
-            if(data.db[fbObj.dbType].online.length==1) {
+            var fbObj=new snippet.FbObj(refUrl);
+            if(model.db[fbObj.dbType].online.length==1) {
                 Firebase.goOffline(fbObj.dbUrl);
             }
             setTimeout(function(){
-                data.db[fbObj.dbType].online.slice(onlineArr.indexOf(t),1);
+                model.db[fbObj.dbType].online.slice(onlineArr.indexOf(t),1);
             },0);
         }
-        //TODO: 做一個函數(在util 服務底下)使不存在的data子屬性能自動產生
-        function load(refUrl, orderBy, limit, isSync, eventType, extraOnComplete){
-            var fbObj=new FbObj(refUrl);
+
+        function updateLocalFb(refUrl, value, key, eventType){
+            var fbObj=new snippet.FbObj(refUrl),
+                pathArr=fbObj.path.split("/");
+            switch(eventType){
+                case "child_added":
+                    snippet.checkThenCreate(localFb, pathArr.push(key), value);
+                    break;
+                case "child_removed":
+                    snippet.checkThenCreate(localFb, pathArr.push(key), null);
+                    break;
+                case "child_changed":
+                    snippet.checkThenCreate(localFb, pathArr.push(key), value);
+                    break;
+                case "child_moved":
+                    break;
+                default:
+                    snippet.checkThenCreate(localFb, pathArr, value);
+                    break;
+            }
+        }
+
+        function load(refUrl, query, extraOnComplete){
+            var fbObj=new snippet.FbObj(refUrl),
+                orderBy=query.orderBy,
+                limit=(query.limit? ("."+query.limit):""),
+                isSync=query.isSync,
+                eventType=query.eventType;
+
             var ref=new Firebase(fbObj.url),
-                queryRef=eval("ref."+(orderBy||"orderByKey()")+"."+limit);
+                queryRef=eval("ref."+(orderBy||"orderByKey()")+limit);
 
             if((!eventType||eventType!="value")&&!isSync) {
                 console.log("invalid to use child_added, child_removed, child_changed of child_moved when isSync==false");
@@ -35,7 +53,7 @@ angular.module('core', ['firebase', 'myApp.config'])
             goOnline_IfAllOffline(refUrl, fbObj.t);
 
             function onComplete(snap, prevChildName){
-                fbStructure(refUrl, snap.val(), eventType); //TODO: 完成fbStructure, 可以將snap.val 寫入fbStructure 裡的refUrl
+                updateLocalFb(refUrl, snap.val(), snap.key(), eventType);
                 if(extraOnComplete) extraOnComplete(snap, prevChildName);
                 if(!isSync) goOffline_IfLastOnline(refUrl, fbObj.t);
             }
@@ -47,7 +65,7 @@ angular.module('core', ['firebase', 'myApp.config'])
         }
 
         function update(refUrl, value, onComplete){
-            var fbObj=new FbObj(refUrl);
+            var fbObj=new snippet.FbObj(refUrl);
             var ref=new Firebase(fbObj.url);
 
             goOnline_IfAllOffline(refUrl, fbObj.t);
@@ -58,13 +76,14 @@ angular.module('core', ['firebase', 'myApp.config'])
                 } else {
                     if(config.debug){console.log("Update success: "+refUrl)}
                     onComplete();
+                    updateLocalFb(refUrl, value);
                 }
                 goOffline_IfLastOnline(refUrl, fbObj.t);
             })
         }
 
         function push(refUrl, value, onComplete){
-            var fbObj=new FbObj(refUrl);
+            var fbObj=new snippet.FbObj(refUrl);
             var ref = new Firebase(fbObj.url);
 
             goOnline_IfAllOffline(refUrl, fbObj.t);
@@ -76,6 +95,7 @@ angular.module('core', ['firebase', 'myApp.config'])
                     } else {
                         if(config.debug){console.log("Update success: "+refUrl)}
                         onComplete();
+                        updateLocalFb(refUrl, value);
                     }
                     goOffline_IfLastOnline(refUrl, fbObj.t);
                 })
@@ -85,7 +105,7 @@ angular.module('core', ['firebase', 'myApp.config'])
         }
 
         function set(refUrl, value, onComplete){
-            var fbObj=new FbObj(refUrl);
+            var fbObj=new snippet.FbObj(refUrl);
             var ref=new Firebase(fbObj.url);
 
             goOnline_IfAllOffline(refUrl, fbObj.t);
@@ -96,9 +116,16 @@ angular.module('core', ['firebase', 'myApp.config'])
                 } else {
                     if(config.debug){console.log("Update success: "+refUrl)}
                     onComplete();
+                    updateLocalFb(refUrl, value);
                 }
                 goOffline_IfLastOnline(refUrl, fbObj.t);
             })
         }
 //TODO: Transaction
+        return {
+            load:load,
+            update:update,
+            set:set,
+            push:push
+        }
     });

@@ -1,5 +1,5 @@
 angular.module('core', ['firebase', 'myApp.config'])
-    .factory('data', function (config, fbutil, $q) {
+    .factory('model', function (config, fbutil, $q) {
         return {
             value:{},
             db:{

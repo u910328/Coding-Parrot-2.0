@@ -1,5 +1,5 @@
 angular.module('core', ['firebase', 'myApp.config'])
-    .factory('driver', function (config, $q, data, action, paths, fbIO) {
+    .factory('driver', function (config, $q, data, action, paths, fbRW, modelRW, fbStructure, modelStructure) {
         function addActivity(info) {
             var def = $q.defer();
             var _case = action[info.type];
