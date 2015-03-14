@@ -36,10 +36,10 @@ angular.module('core', ['firebase', 'myApp.config'])
         }
 
         function update(path, value) {
-            if(value){
-                eval("model.view"+path+"=value");
-            }
+            var pathArr=(typeof path=="object")? path: path.split(".");
+            snippet.checkThenCreate(model, pathArr, value);
             updateView(path)
         }
 
+        return model
     });

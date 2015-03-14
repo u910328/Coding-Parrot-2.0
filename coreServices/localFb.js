@@ -1,5 +1,5 @@
 angular.module('core', ['firebase', 'myApp.config'])
-    .factory('localFb', function (config, fbutil, $q, model, snippet) {
+    .factory('localFb', function (config, fbutil, $q, model, fbRule, snippet) {
         var localFb={
             load:load,
             update:update,
@@ -22,33 +22,38 @@ angular.module('core', ['firebase', 'myApp.config'])
             },0);
         }
 
-        function updateLocalFb(refUrl, value, key, eventType){
+        function updateLocalFb(refUrl, modelPath, value, key, eventType){
             var fbObj=new snippet.FbObj(refUrl),
                 pathArr=fbObj.path.split("/");
             switch(eventType){
                 case "child_added":
                     snippet.checkThenCreate(localFb, pathArr.push(key), value);
+                    if(modelPath) model.update(pathArr.push(key), value);
                     break;
                 case "child_removed":
                     snippet.checkThenCreate(localFb, pathArr.push(key), null);
+                    if(modelPath) model.update(pathArr.push(key), null);
                     break;
                 case "child_changed":
                     snippet.checkThenCreate(localFb, pathArr.push(key), value);
+                    if(modelPath) model.update(pathArr.push(key), value);
                     break;
                 case "child_moved":
                     break;
                 default:
                     snippet.checkThenCreate(localFb, pathArr, value);
+                    if(modelPath) model.update(pathArr, value);
                     break;
             }
         }
 
-        function load(refUrl, query, extraOnComplete){
+        function load(refUrl, modelPath, query, extraOnComplete){
             var fbObj=new snippet.FbObj(refUrl),
-                orderBy=query.orderBy,
-                limit=(query.limit? ("."+query.limit):""),
-                isSync=query.isSync,
-                eventType=query.eventType;
+                Query=query? query :snippet.getRule(fbRule, fbObj.path.split("/")),
+                orderBy=Query.orderBy,
+                limit=(Query.limit? ("."+Query.limit):""),
+                isSync=Query.isSync,
+                eventType=Query.eventType;
 
             var ref=new Firebase(fbObj.url),
                 queryRef=eval("ref."+(orderBy||"orderByKey()")+limit);
@@ -60,7 +65,8 @@ angular.module('core', ['firebase', 'myApp.config'])
             goOnline_IfAllOffline(refUrl, fbObj.t);
 
             function onComplete(snap, prevChildName){
-                updateLocalFb(refUrl, snap.val(), snap.key(), eventType);
+                updateLocalFb(refUrl, modelPath, snap.val(), snap.key(), eventType);
+
                 if(extraOnComplete) extraOnComplete(snap, prevChildName);
                 if(!isSync) goOffline_IfLastOnline(refUrl, fbObj.t);
             }
@@ -71,7 +77,7 @@ angular.module('core', ['firebase', 'myApp.config'])
             eval("queryRef."+(isSync? "on":"once")+"(eventType||'value', onComplete, errorCallback)");
         }
 
-        function update(refUrl, value, onComplete){
+        function update(refUrl, modelPath, value, onComplete){
             var fbObj=new snippet.FbObj(refUrl);
             var ref=new Firebase(fbObj.url);
 
@@ -83,13 +89,13 @@ angular.module('core', ['firebase', 'myApp.config'])
                 } else {
                     if(config.debug){console.log("Update success: "+refUrl)}
                     onComplete();
-                    updateLocalFb(refUrl, value);
+                    updateLocalFb(refUrl, modelPath, value);
                 }
                 goOffline_IfLastOnline(refUrl, fbObj.t);
             })
         }
 
-        function push(refUrl, value, onComplete){
+        function push(refUrl, modelPath, value, onComplete){
             var fbObj=new snippet.FbObj(refUrl);
             var ref = new Firebase(fbObj.url);
 
@@ -102,7 +108,7 @@ angular.module('core', ['firebase', 'myApp.config'])
                     } else {
                         if(config.debug){console.log("Update success: "+refUrl)}
                         onComplete();
-                        updateLocalFb(refUrl, value);
+                        updateLocalFb(refUrl, modelPath, value);
                     }
                     goOffline_IfLastOnline(refUrl, fbObj.t);
                 })
@@ -111,7 +117,7 @@ angular.module('core', ['firebase', 'myApp.config'])
             }
         }
 
-        function set(refUrl, value, onComplete){
+        function set(refUrl, modelPath, value, onComplete){
             var fbObj=new snippet.FbObj(refUrl);
             var ref=new Firebase(fbObj.url);
 
@@ -123,7 +129,7 @@ angular.module('core', ['firebase', 'myApp.config'])
                 } else {
                     if(config.debug){console.log("Update success: "+refUrl)}
                     onComplete();
-                    updateLocalFb(refUrl, value);
+                    updateLocalFb(refUrl, modelPath, value);
                 }
                 goOffline_IfLastOnline(refUrl, fbObj.t);
             })
