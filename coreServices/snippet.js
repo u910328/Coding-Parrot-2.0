@@ -9,6 +9,22 @@ angular.module('core', ['firebase', 'myApp.config'])
             this.dbType=refUrl.split("@")[1];
         }
 
+        function evalAssignment(lhsArr, RHS){
+            var lhs=lhsArr[0],
+                rhs="RHS";
+
+            if((typeof RHS=="object") && RHS.length!=undefined){
+                rhs=RHS[0];
+                for(var j=1; j<lhsArr.length; j++){
+                    rhs=rhs+"["+lhsArr[j]+"]";
+                }
+            }
+            for(var i=1; i<lhsArr.length; i++){
+                lhs=lhs+"["+lhsArr[i]+"]";
+            }
+            eval(lhs+"="+rhs);
+        }
+
         function getRule(structure, pathArr){
             var omniKey={},
                 currentStructure=structure,
@@ -78,6 +94,7 @@ angular.module('core', ['firebase', 'myApp.config'])
         return {
             FbObj:FbObj,
             checkThenCreate:checkThenCreate,
-            getRule:getRule
+            getRule:getRule,
+            evalAssignment:evalAssignment
         }
     });

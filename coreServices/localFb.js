@@ -24,25 +24,26 @@ angular.module('core', ['firebase', 'myApp.config'])
 
         function updateLocalFb(refUrl, modelPath, value, key, eventType){
             var fbObj=new snippet.FbObj(refUrl),
-                pathArr=fbObj.path.split("/");
+                fbPathArr=fbObj.path.split("/"),
+                modelPathArr=modelPath.split(".");
             switch(eventType){
                 case "child_added":
-                    snippet.checkThenCreate(localFb, pathArr.push(key), value);
-                    if(modelPath) model.update(pathArr.push(key), value);
+                    snippet.checkThenCreate(localFb, fbPathArr.push(key), value);
+                    if(modelPath) model.update(modelPathArr.push(key), value);
                     break;
                 case "child_removed":
-                    snippet.checkThenCreate(localFb, pathArr.push(key), null);
-                    if(modelPath) model.update(pathArr.push(key), null);
+                    snippet.checkThenCreate(localFb, fbPathArr.push(key), null);
+                    if(modelPath) model.update(modelPathArr.push(key), null);
                     break;
                 case "child_changed":
-                    snippet.checkThenCreate(localFb, pathArr.push(key), value);
-                    if(modelPath) model.update(pathArr.push(key), value);
+                    snippet.checkThenCreate(localFb, fbPathArr.push(key), value);
+                    if(modelPath) model.update(modelPathArr.push(key), value);
                     break;
                 case "child_moved":
                     break;
                 default:
-                    snippet.checkThenCreate(localFb, pathArr, value);
-                    if(modelPath) model.update(pathArr, value);
+                    snippet.checkThenCreate(localFb, fbPathArr, value);
+                    if(modelPath) model.update(modelPathArr, value);
                     break;
             }
         }
