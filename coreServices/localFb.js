@@ -1,5 +1,5 @@
 angular.module('core', ['firebase', 'myApp.config'])
-    .factory('localFb', function (config, fbutil, $q, model, fbRule, snippet) {
+    .factory('localFb', function (config, fbutil, $q, model, snippet) {
         var localFb={
             load:load,
             update:update,
@@ -48,16 +48,14 @@ angular.module('core', ['firebase', 'myApp.config'])
             }
         }
 
-        function load(refUrl, modelPath, query, extraOnComplete){
+        function load(refUrl, modelPath, rule, extraOnComplete){
             var fbObj=new snippet.FbObj(refUrl),
-                Query=query? query :snippet.getRule(fbRule, fbObj.path.split("/")),
-                orderBy=Query.orderBy,
-                limit=(Query.limit? ("."+Query.limit):""),
-                isSync=Query.isSync,
-                eventType=Query.eventType;
+                query=rule["query"],
+                isSync=rule["isSync"],
+                eventType=rule["eventType"];
 
             var ref=new Firebase(fbObj.url),
-                queryRef=eval("ref."+(orderBy||"orderByKey()")+limit);
+                queryRef=eval("ref."+query);
 
             if((!eventType||eventType!="value")&&!isSync) {
                 console.log("invalid to use child_added, child_removed, child_changed of child_moved when isSync==false");
