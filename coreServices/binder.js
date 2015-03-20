@@ -3,13 +3,10 @@ angular.module('core', ['firebase', 'myApp.config'])
         function bind(scope, modelPath, rule){
             var modelPathArr=("model."+modelPath).split("."),
                 key=modelPathArr[modelPathArr.length-1];
-
-            localFb.load(rule.fbPath, modelPath, rule, function(snap, preChildName){
-                snippet.evalAsignment(["scope", key], modelPathArr);
-            });
+            snippet.evalAsignment(["scope", key], modelPathArr);
         }
-
-        function bindUpdator(scope, modelPath, rule){
+//TODO: 設計 updateCurrentPage
+        function bindUpdater(scope, modelPath, rule){
             var modelPathArr=("model."+modelPath).split("."),
                 key=modelPathArr[modelPathArr.length-1], updater;
             switch(rule.type){
@@ -17,10 +14,13 @@ angular.module('core', ['firebase', 'myApp.config'])
                     //snippet.evalAsignment(["scope", "updateVar"+key], {currentPage:1});
                     updater=function(page){
                         var orderBy="orderBy"+rule.orderBy[0]+"("+rule.orderBy[1]+")",
-                            currentPage=scope[key+"Var"]["currentPage"],
-                            query=orderBy||"orderByKey()"+".startAt("+scope[key+"Var"]["lastItem"][currentPage]+").limitToFirst("+rule.itemPerPage+")",
+                            currentPage=scope[key+"Var"]["currentPage"]||0,
+                            lastItem=scope[key+"Var"]["lastItem"][page]||"",
+                            startAt= currentPage===0? "":".startAt("+lastItem+")",
+                            query=orderBy||"orderByKey()"+startAt+".limitToFirst("+rule.itemPerPage+")",
                             sPaginationRule={query:query, sync:false, eventType:'child_added'};
-                        if(!scope["updateVar"+key]["lastItem"][page]){
+
+                        if(!scope["updateVar"+key]["lastItem"][page]||page===0){
                             var restItem=rule.itemPerPage;
                             localFb.load(rule.fbPath, modelPath, sPaginationRule, function(snap, prevChildName){
                                 restItem--;
@@ -34,13 +34,24 @@ angular.module('core', ['firebase', 'myApp.config'])
                     };
                     break;
                 case "pagination":
-                    updater=function(query){
-                        localFb.load(rule.fbPath, modelPath, query);
-                    };
                     break;
                 case "infiniteScroll":
-                    updater=function(query){
-                        localFb.load(rule.fbPath, modelPath, query);
+                    updater=function(){
+                        var orderBy="orderBy"+rule.orderBy[0]+"("+rule.orderBy[1]+")",
+                            currentPage=scope[key+"Var"]["currentPage"]||0,
+                            lastItem=scope[key+"Var"]["lastItem"]||"",
+                            startAt= currentPage===0? "":".startAt("+lastItem+")",
+                            query=orderBy||"orderByKey()"+startAt+".limitToFirst("+rule.itemPerPage+")",
+                            infiniteScrollRule={query:query, sync:false, eventType:'child_added'};
+
+                        var restItem=rule.itemPerPage;
+                        localFb.load(rule.fbPath, modelPath, infiniteScrollRule, function(snap, prevChildName){
+                            restItem--;
+                            if(restItem===0){
+                                scope[key+"Var"]["lastItem"]=rule.orderBy[0]=="Child"? snap.val()[rule.orderBy[1]]: snap.key();//註冊最後一項的名字
+                                scope[key+"Var"]["currentPage"]++;
+                            }
+                        });
                     };
                     break;
                 default:
@@ -59,13 +70,14 @@ angular.module('core', ['firebase', 'myApp.config'])
             for(var key in rules){
                 var modelPath=rulePath+"."+key;
                 bind(scope, modelPath, rules[key]);
-                bindRenewer(scope, modelPath, rules[key]);
+                bindUpdater(scope, modelPath, rules[key]);
+                scope[key]["update"+key](0);
             }
         }
 
         return {
             bindScope:bindScope,
-            bindRenewer:bindRenewer,
+            bindUpdater:bindUpdater,
             bind:bind
         };
     });
