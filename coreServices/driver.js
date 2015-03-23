@@ -1,5 +1,5 @@
 angular.module('core', ['firebase', 'myApp.config'])
-    .factory('driver', function (config, $q, data, action, paths, localFb, model) {
+    .factory('driver', function (config, $q, data, action, localFb, model) {
         function addActivity(info) {
             var def = $q.defer();
             var _case = action[info.type];
@@ -84,24 +84,36 @@ angular.module('core', ['firebase', 'myApp.config'])
             }
         }
 
-        return function(type, info){
-            info.type=type;
-            addActivity(info)
-                .then(processData)
-                .then(function(info2){
-                    if(info2.responseRef) {
-                        var ref = new Firebase(info2.responseRef);
-                        ref.on("value", function(snap){
-                            if(snap.val().valid){
-                                updateData(info2);
-                                ref.off()
-                            } else {console.log("warning")} /* TODO: 做一個警告系統以提示這個動作未通過BE的檢驗*/
+        function processModel(type, preOrPost){
+            var def=$q.defer(), fnchain="";
+            if(action[type][preOrPost+"Model"]){
+                for(var key in action[type][preOrPost+"Model"]){
+                    if(!eval("typeof "+key+"==='function'")||key==="extraFn"||key==="processModel") continue;
+                    fnchain= fnchain===""? key+"("+action[type][preOrPost+"Model"][key]+")": fnchain+".then(function(){return "+key+"("+action[type][preOrPost+"Model"][key]+")"+"}";
+                }
+            }
+            fnchain= fnchain+".then(function(){def.resolve})";
+            eval(fnchain);
+            return def.promise
+        }
 
-                        });
-                        updateFB(info2);
-                    } else {
-                        updateFB(info2).then(updateData(info2))
-                    }
-                })
+        function updateFb(type){
+
+        }
+
+        return function(type, extraArg){
+            function extraFn(preOrPost){
+                return !!action[type][preOrPost+"Model"]["extraFn"].then? action[type][preOrPost+"Model"]["extraFn"]: function(){    //TODO:確認可以用此法判斷是否包含defer
+                    var def=$q.defer();
+                    if(action[type][preOrPost+"Model"]["extraFn"]) action[type][preOrPost+"Model"]["extraFn"].apply(null, extraArg);
+                    def.resolve();
+                    return def.promise();
+                };
+            }
+            processModel(type, "pre")
+                .then(function(){return extraFn("pre")})
+                .then(function(){return updateFb(type)})
+                .then(function(){return processModel(type, "post")})
+                .then(function(){return extraFn("post")});
         }
     });
