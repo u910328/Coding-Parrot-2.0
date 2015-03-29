@@ -1,12 +1,38 @@
 angular.module('core', ['firebase', 'myApp.config'])
-    .factory('snippet', function (config, $q, data) {
+    .factory('snippet', function (config, $q, model) {
         function FbObj(refUrl){
-            this.dbName=data.db[refUrl.split("@")[1]].dbName;
+            var that=this;
+            this.dbName=model.db[refUrl.split("@")[1]].dbName;
             this.dbUrl="https://"+dbName+".firebaseio.com/";
             this.path=refUrl.split("@")[0];
             this.url= this.dbUrl+this.path;
-            this.t=(new Date).getTime().toString;
             this.dbType=refUrl.split("@")[1];
+            this.t=(new Date).getTime().toString();
+            this.omniKey={};
+            this.ref=function(){
+                var ref= new Firebase(that.dbUrl);
+                var pathArr=refUrl.split("@")[0].split("/");
+                for(var i=0; i<pathArr.length; i++){
+                    if(pathArr[i].charAt(1)==="$"){
+                        ref=ref.push();
+                        that.omniKey[pathArr[i]]=ref.key();
+                    } else {
+                        ref=ref.child(pathArr[i]);
+                    }
+                }
+                that.url=ref.toString();
+                that.path=that.url.replace(ref.dbUrl,"");
+                return ref
+            }
+        }
+
+        function replaceOmniKey(typeAndTime, omniKey){
+            for(var i=0; i<argArr.length; i++){
+                var arg=model.action[typeAndTime]["updateFb"][i];
+                for(var key in omniKey){
+                    model.action[typeAndTime]["updateFb"][i][0]=arg[0].replace(key, omniKey[key]);
+                }
+            }
         }
 
         function evalAssignment(lhsArr, RHS){
@@ -95,6 +121,7 @@ angular.module('core', ['firebase', 'myApp.config'])
             FbObj:FbObj,
             checkThenCreate:checkThenCreate,
             getRule:getRule,
-            evalAssignment:evalAssignment
+            evalAssignment:evalAssignment,
+            replaceOmniKey:replaceOmniKey
         }
     });

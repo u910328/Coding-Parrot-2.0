@@ -1,5 +1,6 @@
 angular.module('core', ['firebase', 'myApp.config'])
     .factory('driver', function (config, $q, data, action, localFb, model) {
+        model.action={};             //起始
         function addActivity(info) {
             var def = $q.defer();
             var _case = action[info.type];
@@ -28,92 +29,101 @@ angular.module('core', ['firebase', 'myApp.config'])
 
             return def.promise
         }
-
-        function processData(info) {
-            var def = $q.defer();
-            eval(action[info.type].processData);
-            def.resolve(info);
-            return def.promise;
-        }
-
-        function updateFB(info) {
-            var def = $q.defer();
-            function collectData(string){
-                var data_update = {};
-                var dataPaths = string.split(",")[2].split("|");
-                var dataRootPath = eval("data."+dataPaths[0]);
-                for(var j=1; j<dataPaths.length;j++){
-                    var key = dataPaths[j];
-                    data_update[key] = dataRootPath[key];
+        var buildInFn={
+            modelToFb:function(mdToFbArr, typeAndTime){
+                var updateArr=[];
+                for(var i=0; i<mdToFbArr.length; i++){
+                    var arr=mdToFbArr[i].split(":"),
+                        modelPath=arr[0],                          //TODO: modelPath也能replace omnikey
+                        updateType=arr[1],
+                        value=snippet.value(model, modelPath),    //TODO: 完成這個snippet
+                        refUrl=arr[2];
+                    updateArr.push([refUrl, modelPath, value, updateType]);
                 }
-                return data_update
-            }
-
-            function batchUpdate(array){
-                var def1=$q.defer();
-                for(var i=0; i<array.length; i++) {
-                    var paths = array[i].split(",");
-                    var path = eval("paths."+info.type+"."+paths[0]);
-                    path = path.replace("$pushKey", info.$pushKey);
-                    var updateDb = array[i].split(",")[1];
-                    var ref = new Firebase("http://"+updateDb+".firebaseio.com/"+path);
-                    ref.update(collectData(array[i]), function(){def1.resolve()});
+                model.action[typeAndTime]["updateFb"]=updateArr
+            },
+            newActivity:function(){},
+            extraFn:function(fn, typeAndTime){
+                switch(typeof fn){
+                    case "function":
+                        var FN=fn;
+                        return !!FN.then? FN.apply(null, model, localFb, $q, typeAndTime): function(){    //TODO:確認可以用此法判斷是否包含defer
+                            var def=$q.defer();
+                            if(FN) FN.apply(null, model, localFb, $q, typeAndTime);
+                            def.resolve();
+                            return def.promise;
+                        };
+                        break;
+                    case "string":
+                        eval("var FN=function(model, localFb, $q, typeAndTime){"+fn+"}");
+                        if(!FN.then){
+                            return function(){
+                                var def=$q.defer();
+                                FN.apply(null, model, localFb, $q, typeAndTime);
+                                def.resolve();
+                                return def.promise;
+                            }
+                        } else {
+                            return FN.apply(null, model, localFb, $q, typeAndTime)
+                        }
+                        break;
                 }
-                return def1.promise
             }
+        };
 
-            function push(){
-                var def2=$q.defer();
-                var pushPaths = action[info.type].updateFB.push||false;
-                if (!pushPaths) {def2.resolve()} else {
-                    var pushDb = pushPaths.split(",")[1];
-                    var pushPath = eval("paths."+info.type+"."+pushPaths.split(",")[0]);
-                    var ref = new Firebase("http://"+pushDb+".firebaseio.com/"+pushPath).push();
-                    info.$pushKey = ref.name();
-                    ref.set(collectData(pushPaths), function(){def2.resolve()});
-                }
-                return def2.promise
-            }
-            push().then(function(){batchUpdate(action[info.type].updateFB.update)}).then(function(){def.resolve()});
-            return def.promise
-        }
 
-        function updateData() {
-            for(var i=0; i<action[info.type].updateData.length; i++){
-                eval("data."+action[info.type].updateData[i])
-            }
-        }
+        function processModel(typeAndTime, preOrPost){
+            var def=$q.defer(),
+                fnchain="",
+                type=typeAndTime.split(":")[0];
 
-        function processModel(type, preOrPost){
-            var def=$q.defer(), fnchain="";
             if(action[type][preOrPost+"Model"]){
                 for(var key in action[type][preOrPost+"Model"]){
-                    if(!eval("typeof "+key+"==='function'")||key==="extraFn"||key==="processModel") continue;
-                    fnchain= fnchain===""? key+"("+action[type][preOrPost+"Model"][key]+")": fnchain+".then(function(){return "+key+"("+action[type][preOrPost+"Model"][key]+")"+"}";
+                    var fn="buildInFn."+key+"("+action[type][preOrPost+"Model"][key]+","+typeAndTime+")";
+                    fnchain= fnchain===""? fn: fnchain+".then(function(){return "+fn+"}"; //TODO: 檢查這種寫法會不會出問題
                 }
             }
-            fnchain= fnchain+".then(function(){def.resolve})";
+            var finishing=preOrPost==="post"? "delete model.action["+typeAndTime+"];":"";
+            fnchain= fnchain===""? finishing+"def.resolve()": fnchain+".then(function(){"+finishing+"def.resolve()})";
             eval(fnchain);
             return def.promise
         }
 
-        function updateFb(type){
+        function updateFb(typeAndTime){
+            var def=$q.defer(),
+                argArr=model.action[typeAndTime]["updateFb"]? model.action[typeAndTime]["updateFb"]:[],
+                fnchain="";
 
+            function fb(i){
+                var arr=model.action[typeAndTime]["updateFb"],
+                    refUrl=arr[i][0],
+                    modelPath=arr[i][1],
+                    value=arr[i][2],
+                    updateType=arr[i][3];
+                return localFb[updateType](refUrl, modelPath, value, "ROK_"+typeAndTime)
+            }
+
+            for(var i=0; i<argArr.length; i++){
+                var fn="fb("+i+")";
+                fnchain= fnchain===""? fn: fnchain+".then(function(){return "+fn+"})"
+            }
+            fnchain= fnchain===""? "def.resolve()":fnchain+".then(function(){def.resolve()})";
+            eval(fnchain);
+            return def.promise
         }
 
         return function(type, extraArg){
-            function extraFn(preOrPost){
-                return !!action[type][preOrPost+"Model"]["extraFn"].then? action[type][preOrPost+"Model"]["extraFn"]: function(){    //TODO:確認可以用此法判斷是否包含defer
+            var t=(new Date).getTime().toString();
+            function extraFn(preOrPost, typeAndTime){
+                return !!action[type][preOrPost+"Model"]["extraFn"].then? action[type][preOrPost+"Model"]["extraFn"].apply(null, extraArg, typeAndTime): function(){    //TODO:確認可以用此法判斷是否包含defer
                     var def=$q.defer();
-                    if(action[type][preOrPost+"Model"]["extraFn"]) action[type][preOrPost+"Model"]["extraFn"].apply(null, extraArg);
+                    if(action[type][preOrPost+"Model"]["extraFn"]) action[type][preOrPost+"Model"]["extraFn"].apply(null, extraArg, typeAndTime);
                     def.resolve();
                     return def.promise();
                 };
             }
-            processModel(type, "pre")
-                .then(function(){return extraFn("pre")})
-                .then(function(){return updateFb(type)})
-                .then(function(){return processModel(type, "post")})
-                .then(function(){return extraFn("post")});
+            processModel(type+":"+t, "pre")
+                .then(function(){return updateFb(type+":"+t)})
+                .then(function(){return processModel(type+":"+t, "post")});
         }
     });

@@ -54,7 +54,7 @@ angular.module('core', ['firebase', 'myApp.config'])
                 isSync=rule["isSync"],
                 eventType=rule["eventType"];
 
-            var ref=new Firebase(fbObj.url),
+            var ref=fbObj.ref(),
                 queryRef=eval("ref."+query);
 
             if((!eventType||eventType!="value")&&!isSync) {
@@ -77,8 +77,7 @@ angular.module('core', ['firebase', 'myApp.config'])
         }
 
         function update(refUrl, modelPath, value, onComplete){
-            var fbObj=new snippet.FbObj(refUrl);
-            var ref=new Firebase(fbObj.url);
+            var fbObj=new snippet.FbObj(refUrl), ref=fbObj.ref(), def=$q.defer();
 
             goOnline_IfAllOffline(refUrl, fbObj.t);
 
@@ -87,38 +86,28 @@ angular.module('core', ['firebase', 'myApp.config'])
                     console.log("Update failed: "+refUrl);
                 } else {
                     if(config.debug){console.log("Update success: "+refUrl)}
-                    onComplete();
+                    switch(typeof onComplete){
+                        case "function":
+                            onComplete();
+                            break;
+                        case "string":
+                            if(onComplete.split(":")[0]==="ROK"){                          //ROK=replacOmniKey
+                                snippet.replaceOmniKey(onComplete.split("_")[1], ref.omniKey);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
                     updateLocalFb(refUrl, modelPath, value);
                 }
                 goOffline_IfLastOnline(refUrl, fbObj.t);
-            })
-        }
-
-        function push(refUrl, modelPath, value, onComplete){
-            var fbObj=new snippet.FbObj(refUrl);
-            var ref = new Firebase(fbObj.url);
-
-            goOnline_IfAllOffline(refUrl, fbObj.t);
-
-            if(value) {
-                ref.push(value, function(error){
-                    if (error) {
-                        console.log("Update failed: "+refUrl);
-                    } else {
-                        if(config.debug){console.log("Update success: "+refUrl)}
-                        onComplete();
-                        updateLocalFb(refUrl, modelPath, value);
-                    }
-                    goOffline_IfLastOnline(refUrl, fbObj.t);
-                })
-            } else {
-                return ref.push()
-            }
+                def.resolve();
+            });
+            return def.promise;
         }
 
         function set(refUrl, modelPath, value, onComplete){
-            var fbObj=new snippet.FbObj(refUrl);
-            var ref=new Firebase(fbObj.url);
+            var fbObj=new snippet.FbObj(refUrl), ref=fbObj.ref();
 
             goOnline_IfAllOffline(refUrl, fbObj.t);
 
