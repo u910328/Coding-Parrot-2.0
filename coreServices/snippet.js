@@ -35,6 +35,14 @@ angular.module('core', ['firebase', 'myApp.config'])
             }
         }
 
+        function replaceModelKey(modelPath, modelOmniKey){
+            var replacedMpath;
+            for(var key in modelOmniKey){
+                replacedMpath=replacedMpath!=undefined? replacedMpath.replace(key, modelOmniKey[key]): modelPath.replace(key, modelOmniKey[key]);
+            }
+            return replacedMpath || modelPath
+        }
+
         function evalAssignment(lhsArr, RHS){
             var lhs=lhsArr[0],
                 rhs="RHS";

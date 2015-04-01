@@ -30,19 +30,18 @@ angular.module('core', ['firebase', 'myApp.config'])
             return def.promise
         }
         var buildInFn={
-            modelToFb:function(mdToFbArr, typeAndTime){
+            modelToFb:function(mdToFbArr, typeAndTime, modelOmniKey){
                 var updateArr=[];
                 for(var i=0; i<mdToFbArr.length; i++){
                     var arr=mdToFbArr[i].split(":"),
-                        modelPath=arr[0],                          //TODO: modelPath也能replace omnikey
+                        modelPath=snippet.replaceModelKey(arr[0], modelOmniKey),
                         updateType=arr[1],
-                        value=snippet.value(model, modelPath),    //TODO: 完成這個snippet
-                        refUrl=arr[2];
+                        refUrl=arr[2],
+                        value=snippet.value(model, modelPath);         //TODO: 完成這個snippet
                     updateArr.push([refUrl, modelPath, value, updateType]);
                 }
-                model.action[typeAndTime]["updateFb"]=updateArr
+                model.action[typeAndTime]["updateFb"]=updateArrf
             },
-            newActivity:function(){},
             extraFn:function(fn, typeAndTime){
                 switch(typeof fn){
                     case "function":
@@ -71,15 +70,18 @@ angular.module('core', ['firebase', 'myApp.config'])
             }
         };
 
+        function transFnName(fnName){
+            return (fnName.search("extraFn")!=-1? "extraFn": fnName)
+        }
 
-        function processModel(typeAndTime, preOrPost){
+        function processModel(typeAndTime, preOrPost, extraArg){
             var def=$q.defer(),
                 fnchain="",
                 type=typeAndTime.split(":")[0];
 
             if(action[type][preOrPost+"Model"]){
                 for(var key in action[type][preOrPost+"Model"]){
-                    var fn="buildInFn."+key+"("+action[type][preOrPost+"Model"][key]+","+typeAndTime+")";
+                    var fn="buildInFn."+transFnName(key)+"("+action[type][preOrPost+"Model"][key]+","+typeAndTime+", extraArg)";
                     fnchain= fnchain===""? fn: fnchain+".then(function(){return "+fn+"}"; //TODO: 檢查這種寫法會不會出問題
                 }
             }
@@ -113,17 +115,10 @@ angular.module('core', ['firebase', 'myApp.config'])
         }
 
         return function(type, extraArg){
-            var t=(new Date).getTime().toString();
-            function extraFn(preOrPost, typeAndTime){
-                return !!action[type][preOrPost+"Model"]["extraFn"].then? action[type][preOrPost+"Model"]["extraFn"].apply(null, extraArg, typeAndTime): function(){    //TODO:確認可以用此法判斷是否包含defer
-                    var def=$q.defer();
-                    if(action[type][preOrPost+"Model"]["extraFn"]) action[type][preOrPost+"Model"]["extraFn"].apply(null, extraArg, typeAndTime);
-                    def.resolve();
-                    return def.promise();
-                };
-            }
-            processModel(type+":"+t, "pre")
-                .then(function(){return updateFb(type+":"+t)})
-                .then(function(){return processModel(type+":"+t, "post")});
+            var t=(new Date).getTime().toString(),
+                typeAndTime=type+":"+t;
+            processModel(typeAndTime, "pre", extraArg)
+                .then(function(){return updateFb(typeAndTime)})
+                .then(function(){return processModel(typeAndTime, "post", extraArg)});
         }
     });
