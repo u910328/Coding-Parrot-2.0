@@ -31,7 +31,7 @@ angular.module('core', ['firebase', 'myApp.config'])
         }
         var buildInFn={
             modelToFb:function(mdToFbArr, typeAndTime, modelOmniKey){
-                var updateArr=[];
+                var updateArr=model.action[typeAndTime]["updateFb"]||[];
                 for(var i=0; i<mdToFbArr.length; i++){
                     var arr=mdToFbArr[i].split(":"),
                         modelPath=snippet.replaceModelKey(arr[0], modelOmniKey),
@@ -45,26 +45,22 @@ angular.module('core', ['firebase', 'myApp.config'])
             extraFn:function(fn, typeAndTime){
                 switch(typeof fn){
                     case "function":
-                        var FN=fn;
-                        return !!FN.then? FN.apply(null, model, localFb, $q, typeAndTime): function(){    //TODO:確認可以用此法判斷是否包含defer
+                        var FN=fn.apply(null, model, localFb, $q, typeAndTime);
+                        return FN.then!=undefined? FN: function(){    //TODO:確認可以用此法判斷是否包含defer
                             var def=$q.defer();
-                            if(FN) FN.apply(null, model, localFb, $q, typeAndTime);
                             def.resolve();
                             return def.promise;
                         };
                         break;
                     case "string":
                         eval("var FN=function(model, localFb, $q, typeAndTime){"+fn+"}");
-                        if(!FN.then){
-                            return function(){
-                                var def=$q.defer();
-                                FN.apply(null, model, localFb, $q, typeAndTime);
-                                def.resolve();
-                                return def.promise;
-                            }
-                        } else {
-                            return FN.apply(null, model, localFb, $q, typeAndTime)
-                        }
+                        var executed= FN.apply(null, model, localFb, $q, typeAndTime);
+
+                        return executed.then!=undefined? FN:function(){
+                            var def=$q.defer();
+                            def.resolve();
+                            return def.promise;
+                        };
                         break;
                 }
             }
@@ -78,6 +74,7 @@ angular.module('core', ['firebase', 'myApp.config'])
             var def=$q.defer(),
                 fnchain="",
                 type=typeAndTime.split(":")[0];
+
 
             if(action[type][preOrPost+"Model"]){
                 for(var key in action[type][preOrPost+"Model"]){
@@ -102,7 +99,7 @@ angular.module('core', ['firebase', 'myApp.config'])
                     modelPath=arr[i][1],
                     value=arr[i][2],
                     updateType=arr[i][3];
-                return localFb[updateType](refUrl, modelPath, value, "ROK_"+typeAndTime)
+                return localFb[updateType](refUrl, modelPath, value, "ROK_"+typeAndTime);            //ROK= replaceOmniKey
             }
 
             for(var i=0; i<argArr.length; i++){
