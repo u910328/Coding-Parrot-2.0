@@ -2,17 +2,44 @@ angular.module('core.snippet', ['firebase', 'myApp.config'])
     .factory('snippet', function (config, $q) {
 
         function evalAssignment(lhsArr, rhsArr){
-            var lhs=lhsArr[0],
+            var lhsPath="",
+                lhs=lhsArr[0],
                 rhs=rhsArr[0];
 
-            for(var j=1; j<rhsArr[1].length; j++){
+            for(var i=0; i<lhsArr[1].length; i++){
+                lhsPath=lhsPath+"['"+lhsArr[1][i]+"']";
+                if(lhs[lhsArr[1][i]]===undefined){
+                    eval("lhsArr[0]"+lhsPath+"={}")
+                } else {
+                    lhs=lhs[lhsArr[1][i]];
+                }
+            }
+
+            for(var j=0; j<rhsArr[1].length; j++){
+                if(rhs[rhsArr[1][j]]===undefined){
+                    rhs=undefined;
+                    break;
+                }
                 rhs=rhs[rhsArr[1][j]];
             }
 
-            for(var i=1; i<lhsArr[1].length; i++){
-                lhs=lhs[lhsArr[1][i]];
+            //console.log(lhsArr[0]); TODO:reomove debug code here
+            //console.log("lhsArr[0]"+lhsPath+"="+rhs);
+            //console.log(eval("lhsArr[0]"+lhsPath));
+            eval("lhsArr[0]"+lhsPath+"=rhs")
+        }
+
+        function checkIfPropertyExist(arr){
+            var obj=arr[0],
+                isExist=true;
+            for(var i=1; i<arr.length; i++){
+                if(obj[arr[i]]===undefined) {
+                    isExist=false;
+                    break;
+                }
+                obj=obj[arr[i]]
             }
-            lhs=rhs
+            return isExist
         }
 
         function getRule(structure, pathArr){
@@ -50,10 +77,12 @@ angular.module('core.snippet', ['firebase', 'myApp.config'])
 
             var contentString=JSON.stringify(currentStructure);
             for(var key in omniKey){
-                contentString=contentString.replace(eval("/"+key+"/g"), omniKey[key])
+                contentString=contentString.replace(eval("/\\"+key+"/g"), omniKey[key])
             }
 
-            return eval(contentString);
+            console.log(JSON.stringify(omniKey));
+
+            return JSON.parse(contentString);
         }
 
         function waitUntil(conditionNum, onComplete, argArr){
@@ -98,6 +127,8 @@ angular.module('core.snippet', ['firebase', 'myApp.config'])
         return {
             checkThenCreate:checkThenCreate,
             getRule:getRule,
-            evalAssignment:evalAssignment
+            evalAssignment:evalAssignment,
+            checkIfPropertyExist:checkIfPropertyExist,
+            waitUntil:waitUntil
         }
     });

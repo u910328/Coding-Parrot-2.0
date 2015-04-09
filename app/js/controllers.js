@@ -8,6 +8,20 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
         $scope.user = user;
         $scope.FBURL = FBURL;
     }])
+    .controller('TestCtrl', ['$scope', 'fbutil', 'test', 'snippet', 'FBURL', function($scope, fbutil, test, snippet, FBURL) {
+        $scope.test=test.test;
+        $scope.test1=test.test1;
+        $scope.test2=test.test2;
+        $scope.swap=function(){
+            snippet.evalAssignment([test,["test","test1"]],[test,["obj","obj1","a"]]);
+        };
+        $scope.check=function(){
+            console.log(snippet.checkIfPropertyExist([test,"test","test2"]))
+        };
+        $scope.getRule=function(){
+            console.log(JSON.stringify(snippet.getRule(test, ["rule","test1","test2"])));
+        }
+    }])
 
     .controller('ChatCtrl', ['$scope', 'messageList', function($scope, messageList) {
         $scope.messages = messageList;

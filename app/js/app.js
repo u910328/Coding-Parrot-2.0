@@ -8,5 +8,7 @@ angular.module('myApp', [
     'myApp.directives',
     'myApp.filters',
     'myApp.routes',
-    'myApp.services'
+    'myApp.services',
+    'core.test',
+    'core.snippet'
   ]);

@@ -3,7 +3,7 @@ angular.module('core', ['firebase', 'myApp.config'])
         function bind(scope, modelPath, rule){
             var modelPathArr=("model."+modelPath).split("."),
                 key=modelPathArr[modelPathArr.length-1];
-            snippet.evalAsignment(["scope", key], modelPathArr);
+            snippet.evalAssignment(["scope", key], modelPathArr);
         }
 //TODO: 設計 updateCurrentPage
         function bindUpdater(scope, modelPath, rule){
@@ -13,11 +13,11 @@ angular.module('core', ['firebase', 'myApp.config'])
                 case "simplePagination":
                     //snippet.evalAsignment(["scope", "updateVar"+key], {currentPage:1});
                     updater=function(page){
-                        var orderBy="orderBy"+rule.orderBy[0]+"("+rule.orderBy[1]+")",
+                        var orderBy=rule.orderBy[0]? "orderBy"+rule.orderBy[0]+"('"+rule.orderBy[1]+"')": "orderByKey()",
                             currentPage=scope[key+"Var"]["currentPage"]||0,
                             lastItem=scope[key+"Var"]["lastItem"][page]||"",
                             startAt= currentPage===0? "":".startAt("+lastItem+")",
-                            query=orderBy||"orderByKey()"+startAt+".limitToFirst("+rule.itemPerPage+")",
+                            query=orderBy+startAt+".limitToFirst("+rule.itemPerPage+")",
                             sPaginationRule={query:query, sync:false, eventType:'child_added'};
 
                         if(!scope["updateVar"+key]["lastItem"][page]||page===0){

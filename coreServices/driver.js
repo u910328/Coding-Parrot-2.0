@@ -1,6 +1,24 @@
 angular.module('core', ['firebase', 'myApp.config'])
-    .factory('driver', function (config, $q, data, action, localFb, model) {
+    .factory('driver', function (config, $q, data, action, localFb, model, snippet) {
         model.action={};             //起始
+
+        function compiledAction(type, config){
+            var actionString=JSON.stringify(action[type]);
+            for(var key in config){
+                if(typeof config[key]!="string") continue;
+                actionString=actionString.replace(eval("/"+key+"/g"), config[key])
+            }
+            var compiled=eval(actionString);
+            for(var key1 in action[type]){
+                for(var key2 in action[type][key1]){
+                    if(!compiled[key1][key2]){
+                        compiled[key1][key2]=action[type][key1][key2];
+                    }
+                }
+            }
+            return compiled
+        }
+
         function addActivity(info) {
             var def = $q.defer();
             var _case = action[info.type];
@@ -29,24 +47,29 @@ angular.module('core', ['firebase', 'myApp.config'])
 
             return def.promise
         }
+
         var buildInFn={
-            modelToFb:function(mdToFbArr, typeAndTime, modelOmniKey){
-                var updateArr=model.action[typeAndTime]["updateFb"]||[];
+            modelToFb:function(mdToFbArr, typeAndTime){
+                var def=$q.defer(),
+                    updateArr=model.action[typeAndTime]["updateFb"]||[];
                 for(var i=0; i<mdToFbArr.length; i++){
                     var arr=mdToFbArr[i].split(":"),
-                        modelPath=snippet.replaceModelKey(arr[0], modelOmniKey),
+                        modelObj=new model.modelObj(arr[0]),
                         updateType=arr[1],
                         refUrl=arr[2],
-                        value=snippet.value(model, modelPath);         //TODO: 完成這個snippet
-                    updateArr.push([refUrl, modelPath, value, updateType]);
+                        value=modelObj.val();
+
+                    updateArr.push([refUrl, modelObj.path, value, updateType]);
                 }
-                model.action[typeAndTime]["updateFb"]=updateArrf
+                model.action[typeAndTime]["updateFb"]=updateArrf;
+                def.resolve();
+                return def.promise
             },
             extraFn:function(fn, typeAndTime){
                 switch(typeof fn){
                     case "function":
-                        var FN=fn.apply(null, model, localFb, $q, typeAndTime);
-                        return FN.then!=undefined? FN: function(){    //TODO:確認可以用此法判斷是否包含defer
+                        var FN=fn.apply(null, [model, localFb, $q, typeAndTime]);
+                        return FN.then!=undefined? FN: function(){
                             var def=$q.defer();
                             def.resolve();
                             return def.promise;
@@ -54,7 +77,7 @@ angular.module('core', ['firebase', 'myApp.config'])
                         break;
                     case "string":
                         eval("var FN=function(model, localFb, $q, typeAndTime){"+fn+"}");
-                        var executed= FN.apply(null, model, localFb, $q, typeAndTime);
+                        var executed= FN.apply(null, [model, localFb, $q, typeAndTime]);
 
                         return executed.then!=undefined? FN:function(){
                             var def=$q.defer();
@@ -63,6 +86,25 @@ angular.module('core', ['firebase', 'myApp.config'])
                         };
                         break;
                 }
+            },
+            delay:function(countdown){
+                var def=$q.defer();
+                setTimeout(function(){def.resolve()}, countdown);
+                return def.promise
+            },
+            log:function(extraValue, typeAndTime){
+                var def=$q.defer(),
+                    updateArr=model.action[typeAndTime]["updateFb"]||[],
+                    type=typeAndTime.split(":")[0],
+                    refUrl=config.logRefUrl.replace(/$uid/g, model.uid),
+                    modelPath=config.logModelPath.replace(/$uid/g, model.uid),
+                    value={type:type, time:Firebase.ServerValue.TIMESTAMP};
+                for(var key in extraValue){
+                    var modelObj=new model.modelObj(extraValue[key]);
+                    value[key]=modelObj.val();
+                }
+                updateArr.push([refUrl, modelPath, value, "update"]);
+                return def.promise
             }
         };
 
@@ -70,25 +112,65 @@ angular.module('core', ['firebase', 'myApp.config'])
             return (fnName.search("extraFn")!=-1? "extraFn": fnName)
         }
 
-        function processModel(typeAndTime, preOrPost, extraArg){
+        function process(compiledType, typeAndTime, preOrPost, extraArg){
             var def=$q.defer(),
-                fnchain="",
-                type=typeAndTime.split(":")[0];
-
-
-            if(action[type][preOrPost+"Model"]){
-                for(var key in action[type][preOrPost+"Model"]){
-                    var fn="buildInFn."+transFnName(key)+"("+action[type][preOrPost+"Model"][key]+","+typeAndTime+", extraArg)";
+                fnchain="";
+            if(preOrPost==="pre") model.action[typeAndTime]={};
+            if(compiledType[preOrPost+"Process"]){
+                for(var key in compiledType[preOrPost+"Process"]){
+                    var fn="buildInFn."+transFnName(key)+"("+compiledType[preOrPost+"Process"][key]+","+typeAndTime+", extraArg)";
                     fnchain= fnchain===""? fn: fnchain+".then(function(){return "+fn+"}"; //TODO: 檢查這種寫法會不會出問題
                 }
             }
-            var finishing=preOrPost==="post"? "delete model.action["+typeAndTime+"];":"";
+            var finishing= preOrPost==="post"? "delete model.action["+typeAndTime+"];":"";
             fnchain= fnchain===""? finishing+"def.resolve()": fnchain+".then(function(){"+finishing+"def.resolve()})";
             eval(fnchain);
             return def.promise
         }
 
-        function updateFb(typeAndTime){
+        function verifyUpdateData(typeAndTime){
+            var def=$q.defer(),
+                type=typeAndTime.split(":")[0];
+                if(action[type]["verify"]===true && !!model.action[typeAndTime]["updateFb"]){
+                    var tobeVerifiedArr= model.action[typeAndTime]["updateFb"],
+                        tobeVerified={typeAndTime: typeAndTime, data: tobeVerifiedArr, time: Firebase.ServerValue.TIMESTAMP},
+                        srvVerifyRefUrl=config.srvVerifyRefUrl.replace(/$uid/g, model.uid),
+                        srvAnsRefUrl=config.srvAnsRefUrl.replace(/$uid/g, model.uid);
+                    localFb.update(srvVerifyRefUrl, "", tobeVerified);           //TODO: config加入SERVER中的VERIFY的路徑
+                    var fbObj= new localFb.FbObj(srvAnsRefUrl),
+                        srvAnsRef=fbObj.ref();
+                    srvAnsRef.child(typeAndTime).once('value', function(snap){
+                        if(snap.val()==="valid"){
+                            def.resolve()
+                        } else {
+                            var reason="Error: invalid data in action:"+typeAndTime;
+                            def.reject(reason)
+                        }
+                    }, function(err){
+                        var reason ="Error: cannot validate the data in action:"+typeAndTime+" ("+err.code+")";
+                        def.reject(reason)
+                    })
+                } else {
+                    def.resolve()
+                }
+            return def.promise
+        }
+
+        function parallelUpdateFb(typeAndTime){
+            var def=$q.defer(),
+                arr=model.action[typeAndTime]["updateFb"]? model.action[typeAndTime]["updateFb"]:[],
+                waitUntil=new snippet.waitUntil(arr.length, function(){def.resolve()});
+            for(var i=0; i<arr.length; i++){
+                var refUrl=arr[i][0],
+                    modelPath=arr[i][1],
+                    value=arr[i][2],
+                    updateType=arr[i][3];
+                localFb[updateType](refUrl, "", value, function(){waitUntil.resolve()}, typeAndTime);
+            }
+            return def.promise
+        }
+
+        function serialUpdateFb(typeAndTime){
             var def=$q.defer(),
                 argArr=model.action[typeAndTime]["updateFb"]? model.action[typeAndTime]["updateFb"]:[],
                 fnchain="";
@@ -99,7 +181,7 @@ angular.module('core', ['firebase', 'myApp.config'])
                     modelPath=arr[i][1],
                     value=arr[i][2],
                     updateType=arr[i][3];
-                return localFb[updateType](refUrl, modelPath, value, "ROK_"+typeAndTime);            //ROK= replaceOmniKey
+                return localFb[updateType](refUrl, "", value, "ROK_"+typeAndTime);            //ROK= replaceOmniKey
             }
 
             for(var i=0; i<argArr.length; i++){
@@ -111,11 +193,19 @@ angular.module('core', ['firebase', 'myApp.config'])
             return def.promise
         }
 
-        return function(type, extraArg){
+        return function(type, omniKey, extraArg){
             var t=(new Date).getTime().toString(),
-                typeAndTime=type+":"+t;
-            processModel(typeAndTime, "pre", extraArg)
+                typeAndTime=type+":"+ t,
+                compiledType=compiledAction(type, omniKey),
+                updateFb=parallelUpdateFb;
+
+            if(action[type]["updateFb"]==="serial"){
+                updateFb=serialUpdateFb;
+            }
+
+            process(compiledType, typeAndTime, "pre", extraArg)
+                .then(function(){return verifyUpdateData(typeAndTime)})
                 .then(function(){return updateFb(typeAndTime)})
-                .then(function(){return processModel(typeAndTime, "post", extraArg)});
+                .then(function(){return process(compiledType, typeAndTime, "post", extraArg)});
         }
     });

@@ -31,7 +31,12 @@ angular.module('myApp.routes', ['ngRoute', 'simpleLogin'])
             // the whenAuthenticated method below will resolve the current user
             // before this controller loads and redirect if necessary
             authRequired: true
-        }
+        },
+        '/test': {
+            templateUrl: 'partials/test.html',
+            controller: 'TestCtrl',
+            resolve: {}
+        },
     })
 
 /**

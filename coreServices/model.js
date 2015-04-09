@@ -2,8 +2,22 @@ angular.module('core', ['firebase', 'myApp.config'])
     .factory('model', function (config, fbutil, $q, snippet, viewLogic) {
         var model={
             update:update,
-            updateView:updateView
+            updateView:updateView,
+            modelObj:modelObj()
         };
+
+        function modelObj(modelPath){
+            var that=this;
+            this.modelPathArr=modelPath.split("|");
+            this.path=this.modelPathArr[0];
+            this.val=function(){
+                var value={};
+                for(var i=0; i<that.modelPathArr.length; i++){
+                    value[that.modelPathArr[i]]=eval("model."+modelPath)[that.modelPathArr[i]]
+                }
+                return value!={}? value:eval("model."+modelPath)
+            }
+        }
 
         function checkRow(i, whichCol) {
             var rowI = viewLogic["table"][i],

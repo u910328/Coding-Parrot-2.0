@@ -2,12 +2,18 @@ angular.module('core', ['firebase', 'myApp.config'])
     .factory('action', function (config, fbutil, $q) {
         return {
             createPj:{
-                activity:"newPj|name|genre|language",
-                updateFB:{
-                    push:"main,db.B,newPj",
-                    update:["list,db.C,newPj|name|genre|language|creatorUid|brief"]
+                preProcess:{
+                    log:{name:"newPj|name", deadline:"newPj|deadline"},
+                    modelToFb:[
+                        "newPj:set:projects/$pid@B",
+                        "newPj|name|genre|lang|creatorUid|brief|dbUrl:set:pjList/$pid@C"
+                    ]
                 },
-                updateData:["visual.pjCreated=true"]
+                verify:true,
+                postProcess:{
+                    log:["newPj|name|genre|lang"],
+                    updateModel:"visual.projectCreated=true"
+                }
             },
             removePj:{},
             updatePj:{}
