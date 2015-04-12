@@ -10,5 +10,7 @@ angular.module('myApp', [
     'myApp.routes',
     'myApp.services',
     'core.test',
-    'core.snippet'
+    'core.snippet',
+    'core.viewLogic',
+    'core.model'
   ]);

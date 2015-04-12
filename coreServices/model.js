@@ -1,4 +1,4 @@
-angular.module('core', ['firebase', 'myApp.config'])
+angular.module('core.model', ['firebase', 'myApp.config'])
     .factory('model', function (config, fbutil, $q, snippet, viewLogic) {
         var model={
             update:update,
@@ -51,7 +51,7 @@ angular.module('core', ['firebase', 'myApp.config'])
 
         function update(path, value) {
             var pathArr=(typeof path=="object")? path: path.split(".");
-            snippet.checkThenCreate(model, pathArr, value);
+            snippet.evalAssignment([model, pathArr], [value]);
             updateView(path)
         }
 

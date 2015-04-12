@@ -6,22 +6,28 @@ angular.module('core.snippet', ['firebase', 'myApp.config'])
                 lhs=lhsArr[0],
                 rhs=rhsArr[0];
 
-            for(var i=0; i<lhsArr[1].length; i++){
-                lhsPath=lhsPath+"['"+lhsArr[1][i]+"']";
-                if(lhs[lhsArr[1][i]]===undefined){
-                    eval("lhsArr[0]"+lhsPath+"={}")
-                } else {
-                    lhs=lhs[lhsArr[1][i]];
+            if(lhsArr[1]!=undefined){
+                for(var i=0; i<lhsArr[1].length; i++){
+                    lhsPath=lhsPath+"['"+lhsArr[1][i]+"']";
+                    if(lhs[lhsArr[1][i]]===undefined){
+                        eval("lhsArr[0]"+lhsPath+"={}")
+                    } else {
+                        lhs=lhs[lhsArr[1][i]];
+                    }
                 }
             }
 
-            for(var j=0; j<rhsArr[1].length; j++){
-                if(rhs[rhsArr[1][j]]===undefined){
-                    rhs=undefined;
-                    break;
+            if(rhsArr[1]!=undefined){
+                for(var j=0; j<rhsArr[1].length; j++){
+                    if(rhs[rhsArr[1][j]]===undefined){
+                        rhs=undefined;
+                        break;
+                    }
+                    rhs=rhs[rhsArr[1][j]];
                 }
-                rhs=rhs[rhsArr[1][j]];
             }
+
+
 
             //console.log(lhsArr[0]); TODO:reomove debug code here
             //console.log("lhsArr[0]"+lhsPath+"="+rhs);
@@ -99,33 +105,7 @@ angular.module('core.snippet', ['firebase', 'myApp.config'])
             }
         }
 
-        function checkThenCreate(targetObj, pathArr, value){                  //TODO:測試
-            var currentObjString="";
-
-            for(var i=0; i<pathArr.length; i++){
-                currentObjString=currentObjString+"["+pathArr[i]+"]";
-
-                //create {} for undefined
-                if(eval("targetObj"+currentObjString+"["+pathArr[i]+"]")==undefined){
-                    eval("targetObj"+currentObjString+"["+pathArr[i]+"]={}")
-                }
-                currentObjString=currentObjString+"["+pathArr[i]+"]";
-
-                if(i==(pathArr.length-1)){
-                    switch(value){
-                        case null:
-                            eval("delete targetObj"+currentObjString);
-                            break;
-                        default:
-                            eval("targetObj"+currentObjString+"=value||true");
-                            break;
-                    }
-                }
-            }
-        }
-
         return {
-            checkThenCreate:checkThenCreate,
             getRule:getRule,
             evalAssignment:evalAssignment,
             checkIfPropertyExist:checkIfPropertyExist,

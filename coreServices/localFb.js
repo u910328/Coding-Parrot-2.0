@@ -1,4 +1,4 @@
-angular.module('core', ['firebase', 'myApp.config'])
+angular.module('core.localFb', ['firebase', 'myApp.config'])
     .factory('localFb', function (config, fbutil, $q, model, snippet) {
         var localFb={
             load:load,
@@ -64,21 +64,21 @@ angular.module('core', ['firebase', 'myApp.config'])
                 modelPathArr=modelPath.split(".");
             switch(eventType){
                 case "child_added":
-                    snippet.checkThenCreate(localFb, fbPathArr.push(key), value);
+                    snippet.evalAssignment([localFb, fbPathArr.push(key)], [value]);
                     if(modelPath) model.update(modelPathArr.push(key), value);
                     break;
                 case "child_removed":
-                    snippet.checkThenCreate(localFb, fbPathArr.push(key), null);
+                    snippet.evalAssignment([localFb, fbPathArr.push(key)],[null]);
                     if(modelPath) model.update(modelPathArr.push(key), null);
                     break;
                 case "child_changed":
-                    snippet.checkThenCreate(localFb, fbPathArr.push(key), value);
+                    snippet.evalAssignment([localFb, fbPathArr.push(key)], [value]);
                     if(modelPath) model.update(modelPathArr.push(key), value);
                     break;
                 case "child_moved":
                     break;
                 default:
-                    snippet.checkThenCreate(localFb, fbPathArr, value);
+                    snippet.evalAssignment([localFb, fbPathArr], [value]);
                     if(modelPath) model.update(modelPathArr, value);
                     break;
             }

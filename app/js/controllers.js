@@ -8,20 +8,37 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
         $scope.user = user;
         $scope.FBURL = FBURL;
     }])
-    .controller('TestCtrl', ['$scope', 'fbutil', 'test', 'snippet', 'FBURL', function($scope, fbutil, test, snippet, FBURL) {
+    .controller('TestCtrl', function($scope, fbutil, config, test, snippet, FBURL, model,viewLogic) {
+        viewLogic.createIndex();
         $scope.test=test.test;
-        $scope.test1=test.test1;
-        $scope.test2=test.test2;
+        $scope.view=model.view;
+        $scope.path=model.path;
         $scope.swap=function(){
-            snippet.evalAssignment([test,["test","test1"]],[test,["obj","obj1","a"]]);
+            snippet.evalAssignment([test,["test","test2"]],[test,["obj","obj1","a"]]);
         };
         $scope.check=function(){
             console.log(snippet.checkIfPropertyExist([test,"test","test2"]))
         };
         $scope.getRule=function(){
             console.log(JSON.stringify(snippet.getRule(test, ["rule","test1","test2"])));
+        };
+        $scope.readModel=function(){
+            var modelObj= new model.modelObj("test.test1.test2|a|b|c");
+            console.log("readModel");
+            console.log(modelObj.pathArr);
+            console.log(JSON.stringify(modelObj.val()))
+        };
+        $scope.getViewLogic=function(){
+            console.log(JSON.stringify(config.viewLogic));
+            console.log(JSON.stringify(viewLogic.index))
+        };
+        $scope.updateModel=function(){
+            model.update("path.path1", 2);
+            model.update("path.path2", 4);
+            model.update("path.path3", 2);
+            model.update("path.path4", 1);
         }
-    }])
+    })
 
     .controller('ChatCtrl', ['$scope', 'messageList', function($scope, messageList) {
         $scope.messages = messageList;
