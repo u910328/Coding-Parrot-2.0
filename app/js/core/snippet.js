@@ -9,7 +9,7 @@ angular.module('core.snippet', ['firebase', 'myApp.config'])
             if(lhsArr[1]!=undefined){
                 for(var i=0; i<lhsArr[1].length; i++){
                     lhsPath=lhsPath+"['"+lhsArr[1][i]+"']";
-                    if(lhs[lhsArr[1][i]]===undefined){
+                    if(typeof lhs[lhsArr[1][i]]!="object"){
                         eval("lhsArr[0]"+lhsPath+"={}")
                     } else {
                         lhs=lhs[lhsArr[1][i]];
