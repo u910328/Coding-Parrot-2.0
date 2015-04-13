@@ -64,12 +64,16 @@ angular.module('core.model', ['firebase', 'myApp.config'])
                 finalResult={};
             if(index===undefined) return finalResult;
             for(var i=1; i<index.length; i++){            //第0個元素為該path所在行數
+                var resultArr=rule[index[i]][colNum-1].split(";"); //rule 的最後一行看起來像 "showAAA=class1;showBBB=class2"
                 if(checkRow(index[i], index[0])){
-                    var resultArr=rule[index[i]][colNum-1].split(";");  //rule 的最後一行看起來像 "showAAA=class1;showBBB=class2"
                     for(var j=0;j<resultArr.length;j++){
-                        finalResult[resultArr[j].split("=")[0]]=resultArr[j].split("=")[1]
+                        finalResult[resultArr[j].split("=")[0]]=resultArr[j].split("=")[1].split("|")[0]
                     }
-                } //TODO:加入不通過時default的處理
+                } else {
+                    for(var k=0;k<resultArr.length;k++){
+                        finalResult[resultArr[k].split("=")[0]]=resultArr[k].split("=")[1].split("|")[1]
+                    }
+                }//TODO:加入不通過時default的處理
             }
             console.log(JSON.stringify(finalResult));
             return finalResult

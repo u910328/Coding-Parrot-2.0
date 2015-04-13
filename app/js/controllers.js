@@ -14,15 +14,17 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
         $scope.localFb=localFb.path;
         $scope.view=model.view;
         $scope.path=model.path;
+
         $scope.swap=function(){
             snippet.evalAssignment([test,["test","test2"]],[test,["obj","obj1","a"]]);
         };
-        $scope.check=function(){
+        $scope.checkIfPropertyExist=function(){
             console.log(snippet.checkIfPropertyExist([test,"test","test2"]))
         };
         $scope.getRule=function(){
             console.log(JSON.stringify(snippet.getRule(test, ["rule","test1","test2"])));
         };
+
         $scope.readModel=function(){
             var modelObj= new model.ModelObj("test.test1.test2|a|b|c");
             console.log("readModel");
@@ -45,12 +47,16 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
             model.update("path.path3", 2);
             model.update("path.path4", 2);
         };
+
+
         $scope.testUpdateLocal=function(){
             localFb.updateLocalFb("path/nonexist1/nonexist2","path.nonexist1.nonexist2", "success");
         };
         $scope.testFbObj=function(){
             var fbObj=new localFb.FbObj("codingParrot2/$test@main");
+            console.log("before ref()",fbObj.path);
             fbObj.ref();
+            console.log("after ref()",fbObj.path);
             fbObj.goOnline();
             setTimeout(function(){
                 fbObj.goOffline();
