@@ -3,7 +3,8 @@ angular.module('core.model', ['firebase', 'myApp.config'])
         var model={
             update:update,
             updateView:updateView,
-            modelObj:ModelObj,
+            ModelObj:ModelObj,
+            db:{online:{}},
             view:{},
             path:{},
             test:{test1:{test2:{a:"a",b:"b",c:"c",d:"d"}}}
@@ -68,14 +69,14 @@ angular.module('core.model', ['firebase', 'myApp.config'])
                     for(var j=0;j<resultArr.length;j++){
                         finalResult[resultArr[j].split("=")[0]]=resultArr[j].split("=")[1]
                     }
-                }
+                } //TODO:加入不通過時default的處理
             }
+            console.log(JSON.stringify(finalResult));
             return finalResult
         }
 
         function updateView(modelPath) {
             var toBeUpdated=preProcessView(modelPath);
-            JSON.stringify(preProcessView(modelPath));
             for (var key in toBeUpdated) {
                 snippet.evalAssignment([model, key.split(".")], [toBeUpdated[key]]);
             }

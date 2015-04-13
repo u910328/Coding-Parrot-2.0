@@ -12,5 +12,6 @@ angular.module('myApp', [
     'core.test',
     'core.snippet',
     'core.viewLogic',
-    'core.model'
+    'core.model',
+    'core.localFb'
   ]);

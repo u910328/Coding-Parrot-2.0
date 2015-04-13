@@ -4,7 +4,9 @@ angular.module('core.localFb', ['firebase', 'myApp.config'])
             FbObj:FbObj,
             load:load,
             update:update,
-            set:set
+            set:set,
+            updateLocalFb:updateLocalFb,
+            path:{}
         };
 
         function FbObj(refUrl){
@@ -36,6 +38,7 @@ angular.module('core.localFb', ['firebase', 'myApp.config'])
                 if(model.db.online[that.dbUrl]===undefined){model.db.online[that.dbUrl]=[]}
                 if(model.db.online[that.dbUrl].length===0){Firebase.goOnline(that.dbUrl)}
                 model.db.online[that.dbUrl].push(that.t);
+                console.log(that.dbUrl,"is online", that.t)
             };
 
             this.goOffline=function(){
@@ -44,8 +47,11 @@ angular.module('core.localFb', ['firebase', 'myApp.config'])
                     Firebase.goOffline(that.dbUrl);
                 }
                 setTimeout(function(){             //TODO: 檢驗是否跟其他的讀寫操作衝突
-                    var tPos=model.db.online[that.dbUrl].indexOf(t);
-                    if(tPos!=-1){model.db.online[that.dbUrl].splice(tPos,1)}
+                    var tPos=model.db.online[that.dbUrl].indexOf(that.t);
+                    if(tPos!=-1){
+                        model.db.online[that.dbUrl].splice(tPos,1);
+                        console.log(that.dbUrl,"is offline", that.t)
+                    }
                 },0);
             }
         }
@@ -60,14 +66,14 @@ angular.module('core.localFb', ['firebase', 'myApp.config'])
             }
         }
 
-        function goOnline_IfAllOffline(refUrl, t){
+        /*function goOnline_IfAllOffline(refUrl, t){
             var fbObj=new FbObj(refUrl);
             if(model.db[fbObj.dbType+"_online"]===undefined){model.db[fbObj.dbType+"_online"]=[]}
             if(model.db[fbObj.dbType+"_online"].length===0){Firebase.goOnline(fbObj.dbUrl)}
             model.db[fbObj.dbType+"_online"].push(t);
         }
 
-        function goOffline_IfLastOnline(refUrl, t){           //TODO: 檢驗是否跟其他的讀寫操作衝突
+        function goOffline_IfLastOnline(refUrl, t){
             var fbObj=new FbObj(refUrl);
             if(model.db[fbObj.dbType+"_online"]===undefined){model.db[fbObj.dbType+"_online"]=[]}
             if(model.db[fbObj.dbType+"_online"].length==1) {
@@ -77,30 +83,28 @@ angular.module('core.localFb', ['firebase', 'myApp.config'])
                 var tPos=model.db[fbObj.dbType+"_online"].indexOf(t);
                 if(tPos!=-1){model.db[fbObj.dbType+"_online"].splice(tPos,1)}
             },0);
-        }
+        }*/
 
-        function updateLocalFb(refUrl, modelPath, value, key, eventType){
-            var fbObj=new FbObj(refUrl),
-                fbPathArr=fbObj.path.split("/"),
-                modelPathArr=modelPath.split(".");
+        function updateLocalFb(fbObjPath, modelPath, value, key, eventType){
+            var fbPathArr=fbObjPath.split("/");
             switch(eventType){
                 case "child_added":
                     snippet.evalAssignment([localFb, fbPathArr.push(key)], [value]);
-                    if(modelPath) model.update(modelPathArr.push(key), value);
+                    if(modelPath) model.update(modelPath+"."+key, value);
                     break;
                 case "child_removed":
                     snippet.evalAssignment([localFb, fbPathArr.push(key)],[null]);
-                    if(modelPath) model.update(modelPathArr.push(key), null);
+                    if(modelPath) model.update(modelPath+"."+key, null);
                     break;
                 case "child_changed":
                     snippet.evalAssignment([localFb, fbPathArr.push(key)], [value]);
-                    if(modelPath) model.update(modelPathArr.push(key), value);
+                    if(modelPath) model.update(modelPath+"."+key, value);
                     break;
                 case "child_moved":
                     break;
                 default:
                     snippet.evalAssignment([localFb, fbPathArr], [value]);
-                    if(modelPath) model.update(modelPathArr, value);
+                    if(modelPath) model.update(modelPath, value);
                     break;
             }
         }
@@ -148,7 +152,7 @@ angular.module('core.localFb', ['firebase', 'myApp.config'])
                 } else {
                     if(config.debug){console.log("Update success: "+refUrl)}
                     onComplete.apply(null);
-                    updateLocalFb(refUrl, modelPath, value);
+                    updateLocalFb(fbObj.path, modelPath, value);
                 }
                 fbObj.goOffline();
                 def.resolve();
@@ -159,7 +163,7 @@ angular.module('core.localFb', ['firebase', 'myApp.config'])
         function set(refUrl, modelPath, value, onComplete){
             var fbObj=new FbObj(refUrl), ref=fbObj.ref();
 
-            goOnline_IfAllOffline(refUrl, fbObj.t);
+            fbObj.goOnline();
 
             ref.set(value, function(error){
                 if (error) {
@@ -169,7 +173,7 @@ angular.module('core.localFb', ['firebase', 'myApp.config'])
                     onComplete();
                     updateLocalFb(refUrl, modelPath, value);
                 }
-                goOffline_IfLastOnline(refUrl, fbObj.t);
+                fbObj.goOffline();
             })
         }
 //TODO: Transaction

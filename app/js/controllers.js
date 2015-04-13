@@ -8,9 +8,10 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
         $scope.user = user;
         $scope.FBURL = FBURL;
     }])
-    .controller('TestCtrl', function($scope, fbutil, config, test, snippet, FBURL, model,viewLogic) {
+    .controller('TestCtrl', function($scope, fbutil, config, test, snippet, localFb, model,viewLogic) {
         viewLogic.createIndex();
         $scope.test=test.test;
+        $scope.localFb=localFb.path;
         $scope.view=model.view;
         $scope.path=model.path;
         $scope.swap=function(){
@@ -23,7 +24,7 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
             console.log(JSON.stringify(snippet.getRule(test, ["rule","test1","test2"])));
         };
         $scope.readModel=function(){
-            var modelObj= new model.modelObj("test.test1.test2|a|b|c");
+            var modelObj= new model.ModelObj("test.test1.test2|a|b|c");
             console.log("readModel");
             console.log(modelObj.pathArr);
             console.log(JSON.stringify(modelObj.val()))
@@ -32,12 +33,29 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
             console.log(JSON.stringify(config.viewLogic));
             console.log(JSON.stringify(viewLogic.index))
         };
-        $scope.updateModel=function(){
+        $scope.updateModel2421=function(){
             model.update("path.path1", 2);
             model.update("path.path2", 4);
             model.update("path.path3", 2);
             model.update("path.path4", 1);
-        }
+        };
+        $scope.updateModel2222=function(){
+            model.update("path.path1", 2);
+            model.update("path.path2", 2);
+            model.update("path.path3", 2);
+            model.update("path.path4", 2);
+        };
+        $scope.testUpdateLocal=function(){
+            localFb.updateLocalFb("path/nonexist1/nonexist2","path.nonexist1.nonexist2", "success");
+        };
+        $scope.testFbObj=function(){
+            var fbObj=new localFb.FbObj("codingParrot2/$test@main");
+            fbObj.ref();
+            fbObj.goOnline();
+            setTimeout(function(){
+                fbObj.goOffline();
+            },10000)
+        };
     })
 
     .controller('ChatCtrl', ['$scope', 'messageList', function($scope, messageList) {
