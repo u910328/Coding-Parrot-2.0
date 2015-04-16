@@ -111,22 +111,24 @@ angular.module('core.localFb', ['firebase', 'myApp.config'])
 
         function load(refUrl, modelPath, rule, extraOnComplete){
             var fbObj=new FbObj(refUrl),
-                query=rule["query"],
+                query=query? "."+rule["query"]:"",
                 isSync=rule["isSync"],
-                eventType=rule["eventType"];
+                eventType=rule["eventType"],
+                scope=rule["scope"];
 
             var ref=fbObj.ref(),
-                queryRef=eval("ref."+query);
+                queryRef=eval("ref"+query);
 
-            if((!eventType||eventType!="value")&&!isSync) {
-                console.log("invalid to use child_added, child_removed, child_changed of child_moved when isSync==false");
-                return
-            }
+            //if((!eventType||eventType!="value")&&!isSync) {
+            //    console.log("invalid to use child_added, child_removed, child_changed of child_moved when isSync==false");
+            //    return
+            //}
             fbObj.goOnline();
 
             function onComplete(snap, prevChildName){
                 updateLocalFb(fbObj.path, modelPath, snap.val(), snap.key(), eventType);
-
+                console.log('load complete', snap.val());
+                if(scope!=undefined) scope.$digest();
                 if(extraOnComplete) extraOnComplete(snap, prevChildName);
                 if(!isSync) fbObj.goOffline();
             }
@@ -134,7 +136,7 @@ angular.module('core.localFb', ['firebase', 'myApp.config'])
                 console.log("Fail to load "+refUrl+": "+err.code);
                 fbObj.goOffline();
             }
-            eval("queryRef."+(isSync? "on":"once")+"(eventType||'value', onComplete, errorCallback)");
+            eval("queryRef."+(isSync? "on":"once")+"('"+(eventType||'value')+"', onComplete, errorCallback)");
         }
 
         function update(refUrl, modelPath, value, onComplete, typeAndTime){
@@ -151,8 +153,8 @@ angular.module('core.localFb', ['firebase', 'myApp.config'])
                     console.log("Update failed: "+refUrl);
                 } else {
                     if(config.debug){console.log("Update success: "+refUrl)}
-                    onComplete.apply(null);
                     updateLocalFb(fbObj.path, modelPath, value);
+                    onComplete.apply(null);
                 }
                 fbObj.goOffline();
                 def.resolve();

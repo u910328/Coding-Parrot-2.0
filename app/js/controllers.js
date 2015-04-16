@@ -62,6 +62,18 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
                 fbObj.goOffline();
             },10000)
         };
+
+        $scope.testLocalFbLoad=function(){
+            var rule={scope:$scope};
+            localFb.load("serverList/cpsrv1@main","path.loadtest", rule)
+        };
+        $scope.testLocalFbUpdate=function(){
+            function onComplete(){
+                $scope.$digest();
+                console.log("success");
+            }
+            localFb.update("serverList/test@main","path.loadtest", {value:5}, onComplete)
+        }
     })
 
     .controller('ChatCtrl', ['$scope', 'messageList', function($scope, messageList) {

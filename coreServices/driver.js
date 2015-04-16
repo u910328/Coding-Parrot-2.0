@@ -1,7 +1,5 @@
 angular.module('core', ['firebase', 'myApp.config'])
     .factory('driver', function (config, $q, data, action, localFb, model, snippet) {
-        model.action={};             //起始
-
         function compiledAction(type, config){
             var actionString=JSON.stringify(action[type]);
             for(var key in config){
