@@ -35,17 +35,11 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
             console.log(JSON.stringify(config.viewLogic));
             console.log(JSON.stringify(viewLogic.index))
         };
-        $scope.updateModel2421=function(){
-            model.update("path.path1", 2);
-            model.update("path.path2", 4);
-            model.update("path.path3", 2);
-            model.update("path.path4", 1);
-        };
-        $scope.updateModel2222=function(){
-            model.update("path.path1", 2);
-            model.update("path.path2", 2);
-            model.update("path.path3", 2);
-            model.update("path.path4", 2);
+        $scope.updateModel=function(){
+            model.update("path.path1", $scope.path.path1);
+            model.update("path.path2", $scope.path.path1);
+            model.update("path.path3", $scope.path.path1);
+            model.update("path.path4", $scope.path.path1);
         };
 
 
