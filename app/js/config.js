@@ -15,11 +15,15 @@ angular.module('myApp.config', [])
     .constant('config', {
         viewLogic:[
             ["path.path1","path.path2","path.path3","path.path4","result"],
-            [">1",">3","===2","===1","view.class1=success1|"],
-            ["","","","===3", "view.class2=success2|"],
-            ["","","===2","","view.class3=success3|"],
-            ["===2","","","","view.class4=success4|"]
-        ]
+            [">1",">3","==2","==1","view.class1=success1|"],
+            ["","","","==3", "view.class2=success2|"],
+            ["","","==2","","view.class3=success3|"],
+            ["==2","","","","view.class4=success4|"]
+        ],
+        fbModelMap:{
+            pjList:{},
+            pjDetail:{}
+        }
     })
 
     // double check that the app has been configured before running it and blowing up space and time

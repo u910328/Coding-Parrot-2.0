@@ -18,8 +18,8 @@ angular.module('core.viewLogic', ['firebase', 'myApp.config'])
             for(var key in config.viewLogic){
                 var firstRow=config.viewLogic[key][0];
                 temp[key]=[];
-                //¥Í¦¨·sªº²Ä¤@¦æ¡Aºî¦X©Ò¦³ªº¤lªíªº²Ä¤@¦æ¡A±N²Ä¤@¦¸¥X²{ªºelement©ñ¨ìrowCount¨º¤@¦C
-                // ¨Ã°O¿ı¨C­ÓKEY ¤lªíªº¤¸¯À¦ì¸m©ótemp[key] array
+                //ç”Ÿæˆæ–°çš„ç¬¬ä¸€è¡Œï¼Œç¶œåˆæ‰€æœ‰çš„å­è¡¨çš„ç¬¬ä¸€è¡Œï¼Œå°‡ç¬¬ä¸€æ¬¡å‡ºç¾çš„elementæ”¾åˆ°rowCounté‚£ä¸€åˆ—
+                // ä¸¦è¨˜éŒ„æ¯å€‹KEY å­è¡¨çš„å…ƒç´ ä½ç½®æ–¼temp[key] array
                 for(var i=0; i<firstRow.length; i++){
                     if(firstRow[i]==="result") break;
                     if(temp.allElement[firstRow[i]]===undefined){
@@ -31,7 +31,7 @@ angular.module('core.viewLogic', ['firebase', 'myApp.config'])
                         temp[key].push(temp.allElement[firstRow[i]]);
                     }
                 }
-                //Á`ªí²£¥Í¤@¦C·sªº§PÂ_¦C¨Ã±N­ì¥»ªºkey ¦WºÙªºtable ¸Ìªº§PÂ_¦C¤¸¯À©ñ¨ì¹ïÀ³ªº¦ì¸m
+                //ç¸½è¡¨ç”¢ç”Ÿä¸€åˆ—æ–°çš„åˆ¤æ–·åˆ—ä¸¦å°‡åŸæœ¬çš„key åç¨±çš„table è£¡çš„åˆ¤æ–·åˆ—å…ƒç´ æ”¾åˆ°å°æ‡‰çš„ä½ç½®
                 for(var j=1; j<config.viewLogic[key].length; j++){
                     viewLogic.ruleMatrix.push([]);
                     for(var k=0; k<firstRow.length; k++){
@@ -42,11 +42,11 @@ angular.module('core.viewLogic', ['firebase', 'myApp.config'])
         }
 
         function createIndex(){
-            viewLogic["index"]={}; //¬ö¿ı³W«hªí¤¤ªº¬YmodelPath ¨ä­ÈÅÜ°Ê©Ò»İÀË¬dªº³¡¤À
+            viewLogic["index"]={}; //ç´€éŒ„è¦å‰‡è¡¨ä¸­çš„æŸmodelPath å…¶å€¼è®Šå‹•æ‰€éœ€æª¢æŸ¥çš„éƒ¨åˆ†
             for(var i=0; i<rowNum; i++){
-                for(var j=0; j<colNum-1; j++){ //³Ì«á¤@¦æ¬O±ø¥ó½T»{«á­nÅÜ°Êªº¦ì¸m
+                for(var j=0; j<colNum-1; j++){ //æœ€å¾Œä¸€è¡Œæ˜¯æ¢ä»¶ç¢ºèªå¾Œè¦è®Šå‹•çš„ä½ç½®
                     if(i===0){
-                        viewLogic["index"][ruleMatrix[0][j]]=[j];    //²Ä0­Ó¤¸¯À¬°¸Ópath©Ò¦b¦æ¼Æ
+                        viewLogic["index"][ruleMatrix[0][j]]=[j];    //ç¬¬0å€‹å…ƒç´ ç‚ºè©²pathæ‰€åœ¨è¡Œæ•¸
                     } else {
                         if(!!ruleMatrix[i][j]){
                             viewLogic["index"][ruleMatrix[0][j]].push(i)

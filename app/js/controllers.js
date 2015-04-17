@@ -37,9 +37,9 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
         };
         $scope.updateModel=function(){
             model.update("path.path1", $scope.path.path1);
-            model.update("path.path2", $scope.path.path1);
-            model.update("path.path3", $scope.path.path1);
-            model.update("path.path4", $scope.path.path1);
+            model.update("path.path2", $scope.path.path2);
+            model.update("path.path3", $scope.path.path3);
+            model.update("path.path4", $scope.path.path4);
         };
 
 
