@@ -5,6 +5,7 @@ angular.module('core.model', ['firebase', 'myApp.config'])
             updateView:updateView,
             ModelObj:ModelObj,
             db:{online:{}},
+            action:{},
             view:{},
             path:{},
             test:{test1:{test2:{a:"a",b:"b",c:"c",d:"d"}}}
