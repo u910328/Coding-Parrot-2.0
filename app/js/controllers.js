@@ -8,15 +8,21 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
         $scope.user = user;
         $scope.FBURL = FBURL;
     }])
-    .controller('TestCtrl', function($scope, fbutil, config, test, snippet, localFb, model,viewLogic) {
+    .controller('TestCtrl', function($scope, fbutil, config, snippet, localFb, model,viewLogic) {
         viewLogic.createIndex();
-        $scope.test=test.test;
         $scope.localFb=localFb.path;
         $scope.view=model.view;
         $scope.path=model.path;
 
-        $scope.swap=function(){
-            snippet.evalAssignment([test,["test","test2"]],[test,["obj","obj1","a"]]);
+        $scope.evalAssignmentTest=function(){
+            model.test={};
+            $scope.test=model.test;
+            model.test.test2="test2";
+            model.test.test1="test1";
+            setTimeout(function(){
+                snippet.evalAssignment([model,["test","test2"]],[model,["test","test1"]]);
+                $scope.$digest();
+            },5000);
         };
         $scope.checkIfPropertyExist=function(){
             console.log(snippet.checkIfPropertyExist([test,"test","test2"]))
@@ -68,6 +74,20 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
             }
             localFb.update("serverList/test@main","path.loadtest", {value:5}, onComplete)
         }
+    })
+    .controller('RouteTestCtrl', function($scope, $route, localFb, model, snippet, config, ROUTES, $location) {
+        $scope.$route = $route;
+        console.log($route.routes);
+        for(var key in $route){console.log(key)}
+        $scope.getRouteKey=function(){
+            console.log($route.current.params);
+            $scope.$routeKey=snippet.getRouteKey($location.path(), $route.current.params);
+        }
+    })
+    .controller('BinderTestCtrl', function($scope, localFb, model, snippet, config, binder, $location, $routeParams) {
+        $scope.getRule=function(){
+            $scope.rule=binder.getRule($location.path(), $routeParams);
+        };
     })
 
     .controller('ChatCtrl', ['$scope', 'messageList', function($scope, messageList) {

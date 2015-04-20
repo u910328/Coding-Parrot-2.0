@@ -89,23 +89,34 @@ angular.module('core.localFb', ['firebase', 'myApp.config'])
             var fbPathArr=fbObjPath.split("/");
             switch(eventType){
                 case "child_added":
-                    snippet.evalAssignment([localFb, fbPathArr.push(key)], [value]);
-                    if(modelPath) model.update(modelPath+"."+key, value);
+                    if(modelPath) {
+                        model.update(modelPath+"."+key, value)
+                    } else{
+                        snippet.evalAssignment([model, fbPathArr.push(key)], [value]);
+                    }
                     break;
                 case "child_removed":
-                    snippet.evalAssignment([localFb, fbPathArr.push(key)],[null]);
-                    if(modelPath) model.update(modelPath+"."+key, null);
+                    if(modelPath) {
+                        model.update(modelPath+"."+key, null)
+                    } else{
+                        snippet.evalAssignment([model, fbPathArr.push(key)], [null]);
+                    }
                     break;
                 case "child_changed":
-                    snippet.evalAssignment([localFb, fbPathArr.push(key)], [value]);
-                    if(modelPath) model.update(modelPath+"."+key, value);
+                    if(modelPath) {
+                        model.update(modelPath+"."+key, value)
+                    } else{
+                        snippet.evalAssignment([model, fbPathArr.push(key)], [value]);
+                    }
                     break;
                 case "child_moved":
                     break;
                 default:
-                    snippet.evalAssignment([localFb, fbPathArr], [value]);
-                    if(modelPath) model.update(modelPath, value);
-                    break;
+                    if(modelPath) {
+                        model.update(modelPath, value)
+                    } else{
+                        snippet.evalAssignment([model, fbPathArr], [value]);
+                    }
             }
         }
 

@@ -9,9 +9,9 @@ angular.module('myApp', [
     'myApp.filters',
     'myApp.routes',
     'myApp.services',
-    'core.test',
     'core.snippet',
     'core.viewLogic',
     'core.model',
-    'core.localFb'
+    'core.localFb',
+    'core.binder'
   ]);

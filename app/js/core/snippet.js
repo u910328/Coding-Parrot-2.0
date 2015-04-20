@@ -1,6 +1,17 @@
 angular.module('core.snippet', ['firebase', 'myApp.config'])
     .factory('snippet', function (config, $q) {
 
+        function getUnionOfObj(objArr){
+            var result=objArr[0];
+            if(objArr.length=1) return result;
+            for(var i=1;i<objArr.length;i++){
+                for(var key in objArr[i]){
+                    result[key]=objArr[i][key];
+                }
+            }
+            return result
+        }
+
         function evalAssignment(lhsArr, rhsArr){
             var lhsPath="",
                 lhs=lhsArr[0],
@@ -37,16 +48,28 @@ angular.module('core.snippet', ['firebase', 'myApp.config'])
 
         function checkIfPropertyExist(arr){
             var obj=arr[0],
+                pathArr=arr[1],
                 isExist=true;
-            for(var i=1; i<arr.length; i++){
-                if(obj[arr[i]]===undefined) {
+            for(var i=0; i<pathArr.length; i++){
+                if(obj[pathArr[i]]===undefined||obj[pathArr[i]]===null) {
                     isExist=false;
                     break;
                 }
-                obj=obj[arr[i]]
+                obj=obj[pathArr[i]]
             }
             return isExist
         }
+
+        function getRouteKey(locationPath, routeParam){
+            var path=locationPath;
+            for(var key in routeParam){
+                if(key==='key') continue;
+                var replacement=routeParam[key].split('/')[1]? ':'+key+'*':':'+key;
+                path=path.replace(routeParam[key], replacement);
+            }
+            return path
+        }
+
 
         function getRule(structure, pathArr){
             var omniKey={},
@@ -107,8 +130,10 @@ angular.module('core.snippet', ['firebase', 'myApp.config'])
 
         return {
             getRule:getRule,
+            getRouteKey:getRouteKey,
             evalAssignment:evalAssignment,
             checkIfPropertyExist:checkIfPropertyExist,
-            waitUntil:waitUntil
+            waitUntil:waitUntil,
+            getUnionOfObj:getUnionOfObj
         }
     });
