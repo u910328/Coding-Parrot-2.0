@@ -66,6 +66,18 @@ angular.module('core.localFb', ['firebase', 'myApp.config'])
             }
         }
 
+        function Digest(scope, fbObj, isSync, delay){
+            var timeout;
+            this.reset=function(callback){
+                if(timeout!=undefined) clearTimeout(timeout);
+                timeout=setTimeout(function(){
+                    if(scope) scope.$digest();
+                    if(callback) callback.apply(null);
+                    if(!isSync) fbObj.goOffline();
+                }, delay);
+            }
+        }
+
         /*function goOnline_IfAllOffline(refUrl, t){
             var fbObj=new FbObj(refUrl);
             if(model.db[fbObj.dbType+"_online"]===undefined){model.db[fbObj.dbType+"_online"]=[]}
@@ -89,54 +101,125 @@ angular.module('core.localFb', ['firebase', 'myApp.config'])
             var fbPathArr=fbObjPath.split("/");
             switch(eventType){
                 case "child_added":
-                    snippet.evalAssignment([localFb, fbPathArr.push(key)], [value]);
-                    if(modelPath) model.update(modelPath+"."+key, value);
+                    if(modelPath) {
+                        model.update(modelPath+"."+key, value)
+                    } else{
+                        snippet.evalAssignment([model, fbPathArr.push(key)], [value]);
+                    }
                     break;
                 case "child_removed":
-                    snippet.evalAssignment([localFb, fbPathArr.push(key)],[null]);
-                    if(modelPath) model.update(modelPath+"."+key, null);
+                    if(modelPath) {
+                        model.update(modelPath+"."+key, null)
+                    } else{
+                        snippet.evalAssignment([model, fbPathArr.push(key)], [null]);
+                    }
                     break;
                 case "child_changed":
-                    snippet.evalAssignment([localFb, fbPathArr.push(key)], [value]);
-                    if(modelPath) model.update(modelPath+"."+key, value);
+                    if(modelPath) {
+                        model.update(modelPath+"."+key, value)
+                    } else{
+                        snippet.evalAssignment([model, fbPathArr.push(key)], [value]);
+                    }
                     break;
                 case "child_moved":
                     break;
                 default:
-                    snippet.evalAssignment([localFb, fbPathArr], [value]);
-                    if(modelPath) model.update(modelPath, value);
-                    break;
+                    if(modelPath) {
+                        model.update(modelPath, value)
+                    } else{
+                        snippet.evalAssignment([model, fbPathArr], [value]);
+                    }
             }
         }
 
-        function load(refUrl, modelPath, rule, extraOnComplete){
+
+
+        function load(refUrl, modelPath, rule, extraOnComplete, finalOnComplete){
             var fbObj=new FbObj(refUrl),
-                query=query? "."+rule["query"]:"",
+                query=rule["query"]? "."+rule["query"]:"",
                 isSync=rule["isSync"],
                 eventType=rule["eventType"],
-                scope=rule["scope"];
+                scope=rule["scope"],
+                delay=rule["delay"]||300;
 
             var ref=fbObj.ref(),
                 queryRef=eval("ref"+query);
 
-            //if((!eventType||eventType!="value")&&!isSync) {
-            //    console.log("invalid to use child_added, child_removed, child_changed of child_moved when isSync==false");
-            //    return
-            //}
+            var digest=new Digest(scope, fbObj, isSync, delay);
+
             fbObj.goOnline();
 
-            function onComplete(snap, prevChildName){
-                updateLocalFb(fbObj.path, modelPath, snap.val(), snap.key(), eventType);
-                console.log('load complete', snap.val());
-                if(scope!=undefined) scope.$digest();
-                if(extraOnComplete) extraOnComplete(snap, prevChildName);
-                if(!isSync) fbObj.goOffline();
+            function RefObj(isSync, eventType){
+                var that=this, sync;
+                function onComplete1(snap, prevChildName, digestCb){
+                    updateLocalFb(fbObj.path, modelPath, snap.val(), snap.key(), eventType);
+                    console.log('load complete', snap.val());
+                    if(extraOnComplete) return extraOnComplete(snap, prevChildName);
+                    digest.reset(function(){
+                        if(typeof digestCb==='function') digestCb.apply(null);
+                        if(typeof finalOnComplete==='function') finalOnComplete.apply(null, [snap, prevChildName])
+                    });
+                }
+
+                if(isSync){
+                    sync='on';
+                    that.onComplete=onComplete1;
+                } else {
+                    sync='once';
+                    if(eventType==='child_added'){
+                        sync='on';
+                        that.onComplete=function(snap, prevChildName){
+                            onComplete1(snap, prevChildName, function(){
+                                queryRef.off('child_added', that.onComplete)
+                            })
+                        }
+                    } else {
+                        that.onComplete=onComplete1
+                    }
+                }
+                that.evalString="queryRef."+sync+"('"+(eventType||'value')+"', onComplete, errorCallback)"
+
             }
+
+
+
+            //function onComplete1(snap, prevChildName){
+            //    updateLocalFb(fbObj.path, modelPath, snap.val(), snap.key(), eventType);
+            //    console.log('load complete', snap.val());
+            //    if(extraOnComplete) return extraOnComplete(snap, prevChildName);
+            //    digest.reset();
+            //}
+            //
+            //function onComplete2(snap){
+            //    snap.forEach(onComplete1);
+            //}
+            //
+            //var onComplete, sync, event=eventType;
+            //if(isSync){
+            //    sync='on';
+            //    onComplete=function(snap, prevChildName){
+            //        onComplete1(snap,prevChildName)
+            //    }
+            //} else {
+            //    sync='once';
+            //    if(eventType==='child_added'){
+            //        event='value';
+            //        onComplete=onComplete2
+            //    } else {
+            //        onComplete=onComplete1
+            //    }
+            //}
+            var refObj=new RefObj(isSync, eventType);
+            var onComplete=refObj.onComplete;
+
             function errorCallback(err){
                 console.log("Fail to load "+refUrl+": "+err.code);
+                //TODO: 加入ERROR到MODEL
                 fbObj.goOffline();
             }
-            eval("queryRef."+(isSync? "on":"once")+"('"+(eventType||'value')+"', onComplete, errorCallback)");
+
+            //eval("queryRef."+sync+"('"+(event||'value')+"', onComplete, errorCallback)");
+            eval(refObj.evalString);
         }
 
         function update(refUrl, modelPath, value, onComplete, typeAndTime){

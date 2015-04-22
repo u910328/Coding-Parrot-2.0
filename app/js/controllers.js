@@ -8,15 +8,21 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
         $scope.user = user;
         $scope.FBURL = FBURL;
     }])
-    .controller('TestCtrl', function($scope, fbutil, config, test, snippet, localFb, model,viewLogic) {
+    .controller('TestCtrl', function($scope, fbutil, config, snippet, localFb, model,viewLogic) {
         viewLogic.createIndex();
-        $scope.test=test.test;
-        $scope.localFb=localFb.path;
         $scope.view=model.view;
         $scope.path=model.path;
 
-        $scope.swap=function(){
-            snippet.evalAssignment([test,["test","test2"]],[test,["obj","obj1","a"]]);
+
+        $scope.evalAssignmentTest=function(){
+            model.test={};
+            $scope.test=model.test;
+            model.test.test2="test2";
+            model.test.test1="test1";
+            setTimeout(function(){
+                snippet.evalAssignment([model,["test","test2"]],[model,["test","test1"]]);
+                $scope.$digest();
+            },5000);
         };
         $scope.checkIfPropertyExist=function(){
             console.log(snippet.checkIfPropertyExist([test,"test","test2"]))
@@ -58,8 +64,10 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
         };
 
         $scope.testLocalFbLoad=function(){
-            var rule={scope:$scope};
-            localFb.load("serverList/cpsrv1@main","path.loadtest", rule)
+            var rule={scope:$scope, eventType:'child_added'};
+            localFb.load("serverList/cpsrv1@main","path.loadtest", rule,'',function(snap){
+                console.log('last key is ', snap.key())
+            })
         };
         $scope.testLocalFbUpdate=function(){
             function onComplete(){
@@ -68,6 +76,35 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
             }
             localFb.update("serverList/test@main","path.loadtest", {value:5}, onComplete)
         }
+    })
+    .controller('RouteTestCtrl', function($scope, $route, localFb, model, snippet, config, ROUTES, $location) {
+        $scope.$route = $route;
+        console.log($route.routes);
+        for(var key in $route){console.log(key)}
+        $scope.getRouteKey=function(){
+            console.log($route.current.params);
+            $scope.$routeKey=snippet.getRouteKey($location.path(), $route.current.params);
+        }
+    })
+    .controller('BinderTestCtrl', function($scope,viewLogic, localFb, model, snippet, config, binder, $location, $routeParams) {
+        viewLogic.createIndex();
+        binder.bindScope($scope);
+        $scope.getRule=function(){
+            $scope.rule=binder.getRule($location.path(), $routeParams);
+        };
+    })
+    .controller('KhtsaoCtrl', function($scope,viewLogic, localFb, model, snippet, config, binder, $location, $routeParams) {
+        viewLogic.createIndex();
+        $scope.view=model.view;
+        $scope.path=model.path;
+        binder.bindScope($scope);
+
+        $scope.updateModel=function(){
+            model.update("path.path1", $scope.path.path1);
+            model.update("path.path2", $scope.path.path2);
+            model.update("path.path3", $scope.path.path3);
+            model.update("path.path4", $scope.path.path4);
+        };
     })
 
     .controller('ChatCtrl', ['$scope', 'messageList', function($scope, messageList) {

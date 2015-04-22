@@ -37,6 +37,32 @@ angular.module('myApp.routes', ['ngRoute', 'simpleLogin'])
             controller: 'TestCtrl',
             resolve: {}
         },
+        '/routeTest/:id1/:id2*/test':{
+            templateUrl: 'partials/routeTest.html',
+            controller: 'RouteTestCtrl'
+        },
+        '/khtsao/:test1/:test2':{
+            templateUrl:'partials/khtsao.html',
+            controller: 'KhtsaoCtrl'
+        },
+        '/binderTest/id1/:id1/id2/:id2':{
+            templateUrl:'partials/binderTest.html',
+            controller:'BinderTestCtrl',
+            bind:{
+                name:{                     //對應的modelPath為 name.itemName
+                    itemName:{
+                        default:'id2',
+                        fb:{
+                            'path/id1/id2@A':{
+                                type:'infiniteScroll',
+                                orderBy:['Child','updateTime'],
+                                itemPerPage:20
+                            }
+                        }
+                    }
+                }
+            }
+        }
     })
 
 /**
