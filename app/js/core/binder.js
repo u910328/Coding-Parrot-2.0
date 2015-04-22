@@ -31,13 +31,10 @@ angular.module('core.binder', ['firebase', 'myApp.config'])
              return JSON.parse(ruleString);
         }
 
-        function BinderObj(scope, modelPath, ruleArr){
+        function BinderObj(scope, modelPath, fbPath, rule){
             var that=this,
-                fbPath=ruleArr[0],
-                rule=ruleArr[1],
                 orderBy=rule.orderBy[0]? "orderBy"+rule.orderBy[0]+"('"+rule.orderBy[1]+"')": "orderByKey()",
-                itemPerPage=rule['itemPerPage']||26,
-                downloaded={};
+                itemPerPage=rule['itemPerPage']||26;
             this.info={
                 currentPage:0,
                 page:{}
@@ -53,35 +50,37 @@ angular.module('core.binder', ['firebase', 'myApp.config'])
                             that.info.page[page]={
                                 itemNum:0
                             };
-                            downloaded[page]={};
+                            that.cache[page]={};
                         }
                         var startAt=that.currentPage===0&&lastItem? "":".startAt("+lastItem+")",
                             query=orderBy+startAt+".limitToFirst("+itemPerPage+")",
-                            sPaginationRule={query:query, eventType:'child_added'};
+                            sPaginationRule={query:query, scope:scope};
                         if(!that.info.page[page].lastItem||page===0){
-                            var countdown=itemPerPage;
-                            localFb.load(fbPath, modelPath, sPaginationRule, function(snap, prevChildName){
-                                countdown--;
+                            localFb.load(fbPath, modelPath, sPaginationRule, function(snap){
                                 that.info.page[page].itemNum++;
-                                downloaded[page][snap.key()]=snap.val();
-                                if(countdown===0){
-                                    that.info.page[page].lastItem=snap.key();
-                                    that.info.currentPage=page;
-                                    updateModel(modelPath, downloaded[page], that.info);
-                                }
+                                that.cache[page][snap.key()]=snap.val()
+                            }, function(snap){
+                                that.info.page[page].lastItem=snap.key();
+                                that.info.currentPage=page;
+                                var cachePath=modelPath+"_cache."+page;
+                                snippet.evalAssignment([model, cachePath.split(".")], [that.cache[page]]);
+                                delete that.cache[page];
+                                updateModel(modelPath, that.cache[page], that.info);//TODO: 修正此處會把舊資料蓋掉的缺點
+                                if(that.info.page[page].itemNum<itemPerPage) that.info.page[page].lastPage=true;
                             });
-                        } else{
+                        } else {
                             that.info.currentPage=page;
-                            updateModel(modelPath, downloaded[page], that.info);
+                            updateModel(modelPath, that.cache[page], that.info);
                         }
                     };
                     break;
                 case "infiniteScroll":
                     that.updater=function(){
-                        var startAt=that.currentPage===0&&lastItem? "":".startAt("+lastItem+")",
+                        var lastItem=that.info.lastItem;
+                        var startAt=lastItem? ".startAt("+lastItem+")":"",
                             query=orderBy+startAt+".limitToFirst("+itemPerPage+")",
                             infiniteScrollRule={query:query, eventType:'child_added'};
-
+                        console.log(lastItem, startAt, query);
                         var restItem=rule.itemPerPage;
                         localFb.load(fbPath, modelPath, infiniteScrollRule, function(snap, prevChildName){
                             restItem--;
@@ -97,7 +96,7 @@ angular.module('core.binder', ['firebase', 'myApp.config'])
                     break;
                 default:
                     that.updater=function(rule, onComplete){
-                        localFb.load(fbPath, modelPath, rule, onComplete);
+                        localFb.load(fbPath, modelPath, rule||{}, onComplete);
                     };
                     break;
             }
@@ -108,20 +107,28 @@ angular.module('core.binder', ['firebase', 'myApp.config'])
             var rule=getRule($location.path(), params);
 
             for(var categoryName in rule){
-                model[categoryName]={};
+                if(model[categoryName]===undefined) model[categoryName]={};
                 scope[categoryName]=model[categoryName];
                 for(var itemName in rule[categoryName]){
                     var modelPath=categoryName+"."+itemName,
-                        binderObj=new BinderObj(scope, modelPath, rule[categoryName][itemName]);
-                    scope[categoryName]["update_"+itemName]=binderObj.updater;
-                    scope[categoryName][itemName+"_info"]=binderObj.info;
-                    binderObj.updater();
+                        itemRule=rule[categoryName][itemName];
+                    model[categoryName][itemName]=itemRule.default;
+                    if(itemRule.fb!=undefined){
+                        var i=0;
+                        for(var fbPath in itemRule.fb){
+                            var binderObj=new BinderObj(scope, modelPath, fbPath, itemRule.fb[fbPath]);
+                            model[categoryName]["update_"+itemName+(i===0? "":i)]=binderObj.updater;
+                            binderObj.updater();//TODO:做個機制使bind過後的資料不會再因CTRL重新產生而在BIND一次
+                            i++
+                        }
+                    }
                 }
             }
         }
 
         return {
             bindScope:bindScope,
-            getRule:getRule
+            getRule:getRule,
+            BinderObj:BinderObj
         };
     });

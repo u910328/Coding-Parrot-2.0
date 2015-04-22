@@ -10,9 +10,9 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
     }])
     .controller('TestCtrl', function($scope, fbutil, config, snippet, localFb, model,viewLogic) {
         viewLogic.createIndex();
-        $scope.localFb=localFb.path;
         $scope.view=model.view;
         $scope.path=model.path;
+
 
         $scope.evalAssignmentTest=function(){
             model.test={};
@@ -64,8 +64,10 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
         };
 
         $scope.testLocalFbLoad=function(){
-            var rule={scope:$scope};
-            localFb.load("serverList/cpsrv1@main","path.loadtest", rule)
+            var rule={scope:$scope, eventType:'child_added'};
+            localFb.load("serverList/cpsrv1@main","path.loadtest", rule,'',function(snap){
+                console.log('last key is ', snap.key())
+            })
         };
         $scope.testLocalFbUpdate=function(){
             function onComplete(){
@@ -84,9 +86,24 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
             $scope.$routeKey=snippet.getRouteKey($location.path(), $route.current.params);
         }
     })
-    .controller('BinderTestCtrl', function($scope, localFb, model, snippet, config, binder, $location, $routeParams) {
+    .controller('BinderTestCtrl', function($scope,viewLogic, localFb, model, snippet, config, binder, $location, $routeParams) {
+        viewLogic.createIndex();
+        binder.bindScope($scope);
         $scope.getRule=function(){
             $scope.rule=binder.getRule($location.path(), $routeParams);
+        };
+    })
+    .controller('KhtsaoCtrl', function($scope,viewLogic, localFb, model, snippet, config, binder, $location, $routeParams) {
+        viewLogic.createIndex();
+        $scope.view=model.view;
+        $scope.path=model.path;
+        binder.bindScope($scope);
+
+        $scope.updateModel=function(){
+            model.update("path.path1", $scope.path.path1);
+            model.update("path.path2", $scope.path.path2);
+            model.update("path.path3", $scope.path.path3);
+            model.update("path.path4", $scope.path.path4);
         };
     })
 

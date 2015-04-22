@@ -8,6 +8,7 @@ angular.module('core.model', ['firebase', 'myApp.config'])
             action:{},
             view:{},
             path:{},
+            error:{},
             test:{test1:{test2:{a:"a",b:"b",c:"c",d:"d"}}}
         };
 
@@ -38,9 +39,9 @@ angular.module('core.model', ['firebase', 'myApp.config'])
             var ithRow = viewLogic["ruleMatrix"][i],
                 pathRow = viewLogic["ruleMatrix"][0],
                 match = true,
-                chagedModelObj=new ModelObj(pathRow[pathCol]),
-                chagedVal=chagedModelObj.val();
-            if (!eval("chagedVal"+ithRow[pathCol])) {   //先檢查改變的以加快檢查速度
+                changedModelObj=new ModelObj(pathRow[pathCol]),
+                changedVal=changedModelObj.val();
+            if (!eval("changedVal"+ithRow[pathCol])) {   //先檢查改變的以加快檢查速度
                 return false;
             }
             for (var j = 0; j < pathRow.length - 1; j++) {
