@@ -8,8 +8,7 @@ angular.module('core.model', ['firebase', 'myApp.config'])
             action:{},
             view:{},
             path:{},
-            error:{},
-            test:{test1:{test2:{a:"a",b:"b",c:"c",d:"d"}}}
+            error:{}
         };
 
         function ModelObj(modelPath){

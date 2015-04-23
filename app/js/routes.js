@@ -53,10 +53,9 @@ angular.module('myApp.routes', ['ngRoute', 'simpleLogin'])
                     itemName:{
                         default:'id2',
                         fb:{
-                            'path/id1/id2@A':{
-                                type:'infiniteScroll',
-                                orderBy:['Child','updateTime'],
-                                itemPerPage:20
+                            'binderTest/id1/id2@A':{
+                                type:'simplePagination',
+                                itemPerPage:3
                             }
                         }
                     }

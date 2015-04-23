@@ -68,13 +68,13 @@ angular.module('core.localFb', ['firebase', 'myApp.config'])
 
         function Digest(scope, fbObj, isSync, delay){
             var timeout;
-            this.reset=function(callback){
+            this.reset=function(callback, overridedDelay){
                 if(timeout!=undefined) clearTimeout(timeout);
                 timeout=setTimeout(function(){
-                    if(scope) scope.$digest();
                     if(callback) callback.apply(null);
                     if(!isSync) fbObj.goOffline();
-                }, delay);
+                    if(scope) scope.$digest();
+                }, overridedDelay||delay);
             }
         }
 
@@ -151,14 +151,16 @@ angular.module('core.localFb', ['firebase', 'myApp.config'])
 
             function RefObj(isSync, eventType){
                 var that=this, sync;
+
                 function onComplete1(snap, prevChildName, digestCb){
                     updateLocalFb(fbObj.path, modelPath, snap.val(), snap.key(), eventType);
                     console.log('load complete', snap.val());
-                    if(extraOnComplete) return extraOnComplete(snap, prevChildName);
+
                     digest.reset(function(){
                         if(typeof digestCb==='function') digestCb.apply(null);
                         if(typeof finalOnComplete==='function') finalOnComplete.apply(null, [snap, prevChildName])
                     });
+                    if(extraOnComplete) return extraOnComplete(snap, prevChildName);
                 }
 
                 if(isSync){
@@ -220,6 +222,7 @@ angular.module('core.localFb', ['firebase', 'myApp.config'])
 
             //eval("queryRef."+sync+"('"+(event||'value')+"', onComplete, errorCallback)");
             eval(refObj.evalString);
+            digest.reset(null, 2000)
         }
 
         function update(refUrl, modelPath, value, onComplete, typeAndTime){

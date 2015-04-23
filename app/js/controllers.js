@@ -17,12 +17,12 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
         $scope.evalAssignmentTest=function(){
             model.test={};
             $scope.test=model.test;
-            model.test.test2="test2";
-            model.test.test1="test1";
+            model.test.test2=2;
+            model.test.test1=1;
             setTimeout(function(){
-                snippet.evalAssignment([model,["test","test2"]],[model,["test","test1"]]);
+                snippet.evalAssignment([model, ["test","test2"]], function(val){return val+1});
                 $scope.$digest();
-            },5000);
+            },500);
         };
         $scope.checkIfPropertyExist=function(){
             console.log(snippet.checkIfPropertyExist([test,"test","test2"]))

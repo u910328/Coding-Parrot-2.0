@@ -6,16 +6,6 @@ angular.module('core.binder', ['firebase', 'myApp.config'])
         //    snippet.evalAssignment([scope, key], modelPathArr);
         //}
 
-        function updateModel(modelPath, targetVal, infoVal, extraFn, countdown, extraFnIfLast){
-            extraFn.apply(null);
-            snippet.evalAssignment([model, modelPath.split('.')], [targetVal]);
-            snippet.evalAssignment([model, (modelPath+'_info').split('.')], infoVal);
-            if(!countdown) {
-                extraFnIfLast.apply(null);
-                scope.$digest();
-            }
-        }
-
         function getRule(locationPath, params){
             var path=snippet.getRouteKey(locationPath, params);
 
@@ -33,35 +23,75 @@ angular.module('core.binder', ['firebase', 'myApp.config'])
 
         function BinderObj(scope, modelPath, fbPath, rule){
             var that=this,
-                orderBy=rule.orderBy[0]? "orderBy"+rule.orderBy[0]+"('"+rule.orderBy[1]+"')": "orderByKey()",
-                itemPerPage=rule['itemPerPage']||26;
-            this.info={
-                currentPage:0,
-                page:{}
-            };
+                orderBy=rule.orderBy? "orderBy"+rule.orderBy[0]+"('"+rule.orderBy[1]+"')": "orderByKey()";
 
             switch(rule.type){
                 case 'simplePagination':
-                    that.updater=function(arg){
-                        var page=arg||0;
-                        if(that.info.page[page]){
-                            var lastItem=that.pageInfo[page].lastItem;
+                    that.updater=function(nextOrPrev){
+
+                        var info=!!nextOrPrev? (new model.ModelObj(modelPath+"_info")).val():{};
+                        var currentPage=info.currentPage||1,
+                            page=(currentPage+nextOrPrev)||1,
+                            isLastPage=info[currentPage]&&info[currentPage].lastPage,
+                            isFirstPage=info[currentPage]&&info[currentPage].firstPage;
+
+                        if(nextOrPrev>0&&isLastPage) return;
+                        if(nextOrPrev<0&&isFirstPage) return;
+
+                        if(!info[page]) {
+                            getPage(page)
                         } else {
-                            that.info.page[page]={
-                                itemNum:0
-                            };
-                            that.cache[page]={};
+                            var cachePageArr=(modelPath+"_cache."+page).split(".");
+                            snippet.evalAssignment([model, modelPath.split('.')], [model, cachePageArr]);
+                            snippet.evalAssignment([model, (modelPath+"_info.currentPage").split('.')], [page]);
                         }
-                        var startAt=that.currentPage===0&&lastItem? "":".startAt("+lastItem+")",
+                        function getPage(page){
+                            var itemPerPage=rule['itemPerPage']||26;
+                            itemPerPage=page!=1? itemPerPage+1:itemPerPage;
+                            var startAt=page===1? "":".startAt('"+info[page-1].lastItem+"')",
+                                query=orderBy+startAt+".limitToFirst("+itemPerPage+")",
+                                sPaginationRule={query:query, scope:scope, eventType:'child_added'},
+                                itemNum= 0,
+                                cache={};
+                            localFb.load(fbPath, null, sPaginationRule, function(snap){
+                                itemNum++;
+                                if(itemNum!=1||page===1) cache[snap.key()]=snap.val();
+                            }, function(snap){
+
+                                var pageInfo={itemNum:itemNum, lastItem:snap.key()};
+                                if(itemNum<itemPerPage) pageInfo.lastPage=true;
+                                if(page===1) pageInfo.firstPage=true;
+
+
+                                snippet.evalAssignment([model, (modelPath+"_info."+page).split('.')], [pageInfo]);
+
+                                var cachePath=modelPath+"_cache."+page;
+
+                                snippet.evalAssignment([model, cachePath.split('.')], [cache]);
+                                snippet.evalAssignment([model, modelPath.split('.')], [cache]);
+                                snippet.evalAssignment([model, (modelPath+"_info.currentPage").split('.')], [page]);
+                            })
+                        }
+                    };
+                    break;
+                case 'pagination':
+                    that.updater=function(arg){
+                        var page=arg||1, lastItem;
+                        var info=(new model.ModelObj(modelPath+"_info")).val();
+                        if(info[page-1]&&page>1){
+                            lastItem=info[page-1].lastItem;
+                        }
+                        var startAt=lastItem? "":".startAt("+lastItem+")",
                             query=orderBy+startAt+".limitToFirst("+itemPerPage+")",
-                            sPaginationRule={query:query, scope:scope};
-                        if(!that.info.page[page].lastItem||page===0){
+                            sPaginationRule={query:query, scope:scope, eventType:'child_added'};
+                        if(!lastItem){
+                            var infoPathArr=modelPath+"_info";
                             localFb.load(fbPath, modelPath, sPaginationRule, function(snap){
-                                that.info.page[page].itemNum++;
+                                snippet.evalAssignment([model, infoPathArr.push(page).push('itemNum')], function(val){return val+1});
                                 that.cache[page][snap.key()]=snap.val()
                             }, function(snap){
-                                that.info.page[page].lastItem=snap.key();
-                                that.info.currentPage=page;
+                                snippet.evalAssignment([model, infoPathArr.push(page).push('lastItem')], [snap.key()]);
+                                snippet.evalAssignment([model, infoPathArr.push('currentPage')], [page]);
                                 var cachePath=modelPath+"_cache."+page;
                                 snippet.evalAssignment([model, cachePath.split(".")], [that.cache[page]]);
                                 delete that.cache[page];

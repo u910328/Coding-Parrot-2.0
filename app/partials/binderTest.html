@@ -1,2 +1,9 @@
 <h3>test getRule</h3>
 <pre>rule = {{rule}}</pre><button ng-click="getRule()">getRule</button>
+
+<h3>simplePagination</h3>
+<pre>info={{name.itemName_info}}</pre><br>
+<pre>cache={{name.itemName_cache}}</pre><br>
+<pre>currentPage={{name.itemName}}</pre><br>
+<button ng-click="name.update_itemName(-1)">prevPage</button>
+<button ng-click="name.update_itemName(+1)">nextPage</button>

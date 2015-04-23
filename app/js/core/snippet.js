@@ -20,30 +20,37 @@ angular.module('core.snippet', ['firebase', 'myApp.config'])
             if(lhsArr[1]!=undefined){
                 for(var i=0; i<lhsArr[1].length; i++){
                     lhsPath=lhsPath+"['"+lhsArr[1][i]+"']";
-                    if(typeof lhs[lhsArr[1][i]]!="object"){
+                    if((i+1<lhsArr[1].length)&&typeof lhs[lhsArr[1][i]]!="object"){
                         eval("lhsArr[0]"+lhsPath+"={}")
                     } else {
                         lhs=lhs[lhsArr[1][i]];
                     }
                 }
             }
-
-            if(rhsArr[1]!=undefined){
-                for(var j=0; j<rhsArr[1].length; j++){
-                    if(rhs[rhsArr[1][j]]===undefined){
-                        rhs=undefined;
-                        break;
+            if(!rhsArr) return eval("lhsArr[0]"+lhsPath);
+            if(typeof rhsArr==='function'){
+                eval("rhs=rhsArr(lhsArr[0]"+lhsPath+")");
+            } else {
+                if(rhsArr[1]!=undefined){
+                    for(var j=0; j<rhsArr[1].length; j++){
+                        if(rhs[rhsArr[1][j]]===undefined){
+                            rhs=undefined;
+                            break;
+                        }
+                        rhs=rhs[rhsArr[1][j]];
                     }
-                    rhs=rhs[rhsArr[1][j]];
                 }
             }
+            console.log("lhsArr[0]"+lhsPath);
+            eval("lhsArr[0]"+lhsPath+"=rhs");
+
 
 
 
             //console.log(lhsArr[0]); TODO:reomove debug code here
             //console.log("lhsArr[0]"+lhsPath+"="+rhs);
             //console.log(eval("lhsArr[0]"+lhsPath));
-            eval("lhsArr[0]"+lhsPath+"=rhs")
+
         }
 
         function checkIfPropertyExist(arr){
