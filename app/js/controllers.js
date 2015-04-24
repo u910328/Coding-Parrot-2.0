@@ -97,6 +97,7 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
         viewLogic.createIndex();
         $scope.view=model.view;
         $scope.path=model.path;
+        $scope.regipage=model.regipage
         binder.bindScope($scope);
 
         $scope.updateModel=function(){
@@ -104,6 +105,8 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
             model.update("path.path2", $scope.path.path2);
             model.update("path.path3", $scope.path.path3);
             model.update("path.path4", $scope.path.path4);
+            model.update("regi.user.name", $scope.regi.user.name);
+            model.update("regi.user.categories", $scope.regi.user.categories);
         };
     })
 
