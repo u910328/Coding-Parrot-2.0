@@ -20,8 +20,8 @@ angular.module('core.action', ['firebase', 'myApp.config'])
             test:{
                 preProcess:{
                     modelToFb:[
-                        "driverTest.test:set:driverTest/$pid@B",
-                        "driverTest.test|a|b|c:set:driverTest/$pid@C"
+                        "driverTest.test:update:driverTest/$pid@B",
+                        "driverTest.test|a|b|c:update:driverTest/$pid/sub@C"
                     ],
                     delay:2000,
                     extraFn:""+function(){console.log('extraFn')}
