@@ -1,3 +1,202 @@
+
+
+<div class="flexbox flexbox-orient-vertical box-example">
+    <h1 class="heading">
+        Profile or Projects
+    </h1>
+    <div class="flexbox box-example">
+        <div class="flex-1">
+            <div class="input-group">
+              <span class="input-group-addon">
+                        name
+                    </span>
+                <input class="form-control" ng-model="regi.user.name" type="text">
+            </div>
+        </div>
+    </div>
+    <div class="flexbox box-example">
+        <div class="flex-1 padding-5px">
+            <h1 class="heading">
+                Categories
+            </h1>
+            <form method="post">
+                <p class="no-margin">
+                    <select class="full-width" ng-model="regi.user.categories">
+                        <option value="1">
+                            Coder
+                        </option>
+                        <option value="2">
+                            Project Manager
+                        </option>
+                    </select>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <button ng-click="updateModel()">submit</button>
+
+    <div class="flexbox box-example no-margin">
+        <div class="flex-1 padding-5px">
+            <h1 class="heading">
+                Details
+            </h1>
+            <form action="#" method="post">
+                <p class="no-margin">
+                    <textarea class="input-text" placeholder="What's up?"></textarea>
+                </p>
+            </form>
+        </div>
+    </div>
+
+
+    <div class="flexbox box-example">
+        <div class="project-card">
+            <div class="box-example card-h400px flex-1">
+                <div class="flexbox">
+                    <div class="full-width no-margin">
+                        <div class="panel-heading">
+                            project name
+                        </div>
+                        <ul>
+                            <li class="card-content-inline">
+                                <p class="card-main multiple-ellipsis">
+                      <span class="multiple-ellipsis-text">
+                        Project details
+                      </span>
+                                </p>
+                                <p class="more-link">
+                                    <a href="#">more details</a>
+                                </p>
+                            </li>
+                            <li class="card-content-inline">
+                                <p class="card-main multiple-ellipsis">
+                                    <span class="multiple-ellipsis-text">Project requirements</span>
+                                </p>
+                                <p class="more-link">
+                                    <a href="#">more details</a>
+                                </p>
+                            </li>
+                            <li class="card-content-inline">
+                                <p class="card-main multiple-ellipsis">
+                                    <span class="multiple-ellipsis-text">project process and due date</span>
+                                </p>
+                                <p class="more-link">
+                                    <a href="#">more details</a>
+                                </p>
+                            </li>
+                        </ul>
+                        <div class="flexbox card-h100px">
+                            <div class="media block-update-card">
+                                <a class="pull-left" href="#">
+                                    <img class="media-object update-card-MDimentions margin-5px" src="http://3.bp.blogspot.com/-IbEOTNtCMyU/TfCAdHaAxEI/AAAAAAAAA8U/EATib38SSAM/s320/joe-mcelderry.jpg" alt="...">
+                                </a>
+                                <div class="media-body margin-5px">
+                                    <h4 class="media-heading">
+                                        <p>{{regi.user.name}}</p>
+                                    </h4>
+                                </div>
+                                <div class="btn-group">
+                                    <a href="#" class="btn btn-default">Button 1</a>
+                                    <a href="#" class="btn btn-default">Button 2</a>
+                                    <a href="#" class="btn btn-default">Button 3</a>
+                                </div>
+                                <div class="card-action-pellet btn-toolbar pull-right" role="toolbar">
+                                    <div class="btn-group">
+                                        1
+                                    </div>
+                                    <div class="btn-group">
+                                        2
+                                    </div>
+                                    <div class="btn-group">
+                                        3
+                                    </div>
+                                    <div class="btn-group">
+                                        4
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="user-card">
+            <div class="box-example card-h400px flex-1">
+                <div class="flexbox">
+                    <div class="full-width no-margin">
+                        <div class="flexbox card-h100px">
+                            <div class="media block-update-card">
+                                <a class="pull-left" href="#">
+                                    <img class="media-object update-card-MDimentions margin-5px" src="http://3.bp.blogspot.com/-IbEOTNtCMyU/TfCAdHaAxEI/AAAAAAAAA8U/EATib38SSAM/s320/joe-mcelderry.jpg" alt="...">
+                                </a>
+                                <div class="media-body margin-5px">
+                                    <h4 class="media-heading">
+                                        Manning Hilton
+                                    </h4>
+                                </div>
+                                <div class="btn-group">
+                                    <a href="#" class="btn btn-default">Button 1</a>
+                                    <a href="#" class="btn btn-default">Button 2</a>
+                                    <a href="#" class="btn btn-default">Button 3</a>
+                                </div>
+                                <div class="card-action-pellet btn-toolbar pull-right" role="toolbar">
+                                    <div class="btn-group">
+                                        1
+                                    </div>
+                                    <div class="btn-group">
+                                        2
+                                    </div>
+                                    <div class="btn-group">
+                                        3
+                                    </div>
+                                    <div class="btn-group">
+                                        4
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <ul>
+                            <li class="card-content-inline">
+                                <p class="card-main multiple-ellipsis">
+                      <span class="multiple-ellipsis-text">
+                        User's details
+                      </span>
+                                </p>
+                                <p class="more-link">
+                                    <a href="#">more details</a>
+                                </p>
+                            </li>
+                            <li class="card-content-inline">
+                                <p class="card-main multiple-ellipsis">
+                                    <span class="multiple-ellipsis-text">User's reviews</span>
+                                </p>
+                                <p class="more-link">
+                                    <a href="#">more details</a>
+                                </p>
+                            </li>
+                            <li class="card-content-inline">
+                                <p class="card-main multiple-ellipsis">
+                                    <span class="multiple-ellipsis-text">Past projects</span>
+                                </p>
+                                <p class="more-link">
+                                    <a href="#">more details</a>
+                                </p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="flexbox-item">
+        3
+    </div>
+    <div class="flexbox-item">
+        4
+    </div>
+</div>
 <h3>visualLogicTest</h3>
 <p>class1:{{view.class1}},class2:{{view.class2}},class3:{{view.class3}},class4:{{view.class4}}</p> <br>
 <p>path1:{{path.path1}},path2:{{path.path2}},path3:{{path.path3}},path4:{{path.path4}}</p><br>
@@ -6,202 +205,3 @@
 <br>
 <button ng-click="updateModel()">updateModel</button>
 
-<div id="middle">
-    <div class="flexbox flexbox-orient-vertical box-example">
-        <h1 class="heading">
-            Profile or Projects
-        </h1>
-        <div class="flexbox box-example">
-            <div class="flex-1">
-                <div class="input-group">
-              <span class="input-group-addon">
-                        name
-                    </span>
-                    <input class="form-control" ng-model="regi.user.name" type="text">
-                </div>
-            </div>
-        </div>
-        <div class="flexbox box-example">
-            <div class="flex-1 padding-5px">
-                <h1 class="heading">
-                    Categories
-                </h1>
-                <form method="post">
-                    <p class="no-margin">
-                        <select class="full-width" ng-model="regi.user.categories">
-                            <option value="1">
-                                Coder
-                            </option>
-                            <option value="2">
-                                Project Manager
-                            </option>
-                        </select>
-                    </p>
-                </form>
-            </div>
-        </div>
-
-        <button ng-click="updateModel()">submit</button>
-
-        <div class="flexbox box-example no-margin">
-            <div class="flex-1 padding-5px">
-                <h1 class="heading">
-                    Details
-                </h1>
-                <form action="#" method="post">
-                    <p class="no-margin">
-                        <textarea class="input-text" placeholder="What's up?"></textarea>
-                    </p>
-                </form>
-            </div>
-        </div>
-
-
-        <div class="flexbox box-example">
-            <div class="project-card">
-                <div class="box-example card-h400px flex-1">
-                    <div class="flexbox">
-                        <div class="full-width no-margin">
-                            <div class="panel-heading">
-                                project name
-                            </div>
-                            <ul>
-                                <li class="card-content-inline">
-                                    <p class="card-main multiple-ellipsis">
-                      <span class="multiple-ellipsis-text">
-                        Project details
-                      </span>
-                                    </p>
-                                    <p class="more-link">
-                                        <a href="#">more details</a>
-                                    </p>
-                                </li>
-                                <li class="card-content-inline">
-                                    <p class="card-main multiple-ellipsis">
-                                        <span class="multiple-ellipsis-text">Project requirements</span>
-                                    </p>
-                                    <p class="more-link">
-                                        <a href="#">more details</a>
-                                    </p>
-                                </li>
-                                <li class="card-content-inline">
-                                    <p class="card-main multiple-ellipsis">
-                                        <span class="multiple-ellipsis-text">project process and due date</span>
-                                    </p>
-                                    <p class="more-link">
-                                        <a href="#">more details</a>
-                                    </p>
-                                </li>
-                            </ul>
-                            <div class="flexbox card-h100px">
-                                <div class="media block-update-card">
-                                    <a class="pull-left" href="#">
-                                        <img class="media-object update-card-MDimentions margin-5px" src="http://3.bp.blogspot.com/-IbEOTNtCMyU/TfCAdHaAxEI/AAAAAAAAA8U/EATib38SSAM/s320/joe-mcelderry.jpg" alt="...">
-                                    </a>
-                                    <div class="media-body margin-5px">
-                                        <h4 class="media-heading">
-                                            {{regi.user.name}}
-                                        </h4>
-                                    </div>
-                                    <div class="btn-group">
-                                        <a href="#" class="btn btn-default">Button 1</a>
-                                        <a href="#" class="btn btn-default">Button 2</a>
-                                        <a href="#" class="btn btn-default">Button 3</a>
-                                    </div>
-                                    <div class="card-action-pellet btn-toolbar pull-right" role="toolbar">
-                                        <div class="btn-group">
-                                            1
-                                        </div>
-                                        <div class="btn-group">
-                                            2
-                                        </div>
-                                        <div class="btn-group">
-                                            3
-                                        </div>
-                                        <div class="btn-group">
-                                            4
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="user-card">
-                <div class="box-example card-h400px flex-1">
-                    <div class="flexbox">
-                        <div class="full-width no-margin">
-                            <div class="flexbox card-h100px">
-                                <div class="media block-update-card">
-                                    <a class="pull-left" href="#">
-                                        <img class="media-object update-card-MDimentions margin-5px" src="http://3.bp.blogspot.com/-IbEOTNtCMyU/TfCAdHaAxEI/AAAAAAAAA8U/EATib38SSAM/s320/joe-mcelderry.jpg" alt="...">
-                                    </a>
-                                    <div class="media-body margin-5px">
-                                        <h4 class="media-heading">
-                                            Manning Hilton
-                                        </h4>
-                                    </div>
-                                    <div class="btn-group">
-                                        <a href="#" class="btn btn-default">Button 1</a>
-                                        <a href="#" class="btn btn-default">Button 2</a>
-                                        <a href="#" class="btn btn-default">Button 3</a>
-                                    </div>
-                                    <div class="card-action-pellet btn-toolbar pull-right" role="toolbar">
-                                        <div class="btn-group">
-                                            1
-                                        </div>
-                                        <div class="btn-group">
-                                            2
-                                        </div>
-                                        <div class="btn-group">
-                                            3
-                                        </div>
-                                        <div class="btn-group">
-                                            4
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <ul>
-                                <li class="card-content-inline">
-                                    <p class="card-main multiple-ellipsis">
-                      <span class="multiple-ellipsis-text">
-                        User's details
-                      </span>
-                                    </p>
-                                    <p class="more-link">
-                                        <a href="#">more details</a>
-                                    </p>
-                                </li>
-                                <li class="card-content-inline">
-                                    <p class="card-main multiple-ellipsis">
-                                        <span class="multiple-ellipsis-text">User's reviews</span>
-                                    </p>
-                                    <p class="more-link">
-                                        <a href="#">more details</a>
-                                    </p>
-                                </li>
-                                <li class="card-content-inline">
-                                    <p class="card-main multiple-ellipsis">
-                                        <span class="multiple-ellipsis-text">Past projects</span>
-                                    </p>
-                                    <p class="more-link">
-                                        <a href="#">more details</a>
-                                    </p>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-        <div class="flexbox-item">
-            3
-        </div>
-        <div class="flexbox-item">
-            4
-        </div>
-    </div>
-</div>
