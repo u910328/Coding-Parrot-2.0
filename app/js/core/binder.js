@@ -42,7 +42,8 @@ angular.module('core.binder', ['firebase', 'myApp.config'])
                             getPage(page)
                         } else {
                             var cachePageArr=(modelPath+"_cache."+page).split(".");
-                            snippet.evalAssignment([model, modelPath.split('.')], [model, cachePageArr]);
+                            model.update(modelPath, null, [model, cachePageArr]);
+                            //snippet.evalAssignment([model, modelPath.split('.')], [model, cachePageArr]);
                             snippet.evalAssignment([model, (modelPath+"_info.currentPage").split('.')], [page]);
                         }
                         function getPage(page){
@@ -68,7 +69,8 @@ angular.module('core.binder', ['firebase', 'myApp.config'])
                                 var cachePath=modelPath+"_cache."+page;
 
                                 snippet.evalAssignment([model, cachePath.split('.')], [cache]);
-                                snippet.evalAssignment([model, modelPath.split('.')], [cache]);
+                                model.update(modelPath, cache);
+                                //snippet.evalAssignment([model, modelPath.split('.')], [cache]);
                                 snippet.evalAssignment([model, (modelPath+"_info.currentPage").split('.')], [page]);
                             })
                         }
@@ -125,7 +127,9 @@ angular.module('core.binder', ['firebase', 'myApp.config'])
                     };
                     break;
                 default:
-                    that.updater=function(rule, onComplete){
+                    that.updater=function(ruleInput, onComplete){
+                        var rule=ruleInput||{};
+                        rule.scope=rule.scope||scope;
                         localFb.load(fbPath, modelPath, rule||{}, onComplete);
                     };
                     break;
@@ -142,13 +146,14 @@ angular.module('core.binder', ['firebase', 'myApp.config'])
                 for(var itemName in rule[categoryName]){
                     var modelPath=categoryName+"."+itemName,
                         itemRule=rule[categoryName][itemName];
-                    model[categoryName][itemName]=itemRule.default;
+                    model.update(categoryName+'.'+itemName, itemRule.default);
+                    //model[categoryName][itemName]=itemRule.default;
                     if(itemRule.fb!=undefined){
                         var i=0;
                         for(var fbPath in itemRule.fb){
                             var binderObj=new BinderObj(scope, modelPath, fbPath, itemRule.fb[fbPath]);
                             model[categoryName]["update_"+itemName+(i===0? "":i)]=binderObj.updater;
-                            binderObj.updater();//TODO:做個機制使bind過後的資料不會再因CTRL重新產生而在BIND一次
+                            binderObj.updater();
                             i++
                         }
                     }

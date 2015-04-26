@@ -49,7 +49,7 @@ angular.module('myApp.routes', ['ngRoute', 'simpleLogin'])
             templateUrl:'partials/binderTest.html',
             controller:'BinderTestCtrl',
             bind:{
-                name:{                     //對應的modelPath為 name.itemName
+                cate1:{                     //對應的modelPath為 name.itemName
                     itemName:{
                         default:'id2',
                         fb:{
@@ -57,6 +57,12 @@ angular.module('myApp.routes', ['ngRoute', 'simpleLogin'])
                                 type:'simplePagination',
                                 itemPerPage:3
                             }
+                        }
+                    },
+                    itemName2:{
+                        default:'id1',
+                        fb:{
+                            'binderTest/id1/789@A':{}
                         }
                     }
                 }

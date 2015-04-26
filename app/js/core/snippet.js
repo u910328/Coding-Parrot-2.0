@@ -1,6 +1,21 @@
 angular.module('core.snippet', ['firebase', 'myApp.config'])
     .factory('snippet', function (config, $q) {
 
+        function ReplaceableObj(){
+            var that=this;
+            this.replace=function(objName,params){
+                if(that[objName]===undefined) that[objName]={};
+                var resString=JSON.stringify(that[objName]);
+                for(var key in params){
+                    resString=resString.replace(eval("/\\"+key+"/g"), params[key]);
+                }
+                that[objName]=JSON.parse(resString);
+            };
+            this.showObj=function(objName){
+                console.log(JSON.stringify(that[objName]))
+            }
+        }
+
         function getUnionOfObj(objArr){
             var result=objArr[0];
             if(objArr.length=1) return result;
@@ -41,7 +56,7 @@ angular.module('core.snippet', ['firebase', 'myApp.config'])
                     }
                 }
             }
-            console.log("lhsArr[0]"+lhsPath);
+
             eval("lhsArr[0]"+lhsPath+"=rhs");
 
 
@@ -141,6 +156,7 @@ angular.module('core.snippet', ['firebase', 'myApp.config'])
             evalAssignment:evalAssignment,
             checkIfPropertyExist:checkIfPropertyExist,
             waitUntil:waitUntil,
-            getUnionOfObj:getUnionOfObj
+            getUnionOfObj:getUnionOfObj,
+            ReplaceableObj:ReplaceableObj
         }
     });

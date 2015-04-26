@@ -8,12 +8,17 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
         $scope.user = user;
         $scope.FBURL = FBURL;
     }])
-    .controller('TestCtrl', function($scope, fbutil, config, snippet, localFb, model,viewLogic) {
+    .controller('TestCtrl', function($scope, fbutil, config, snippet, localFb, model,viewLogic, driver) {
         viewLogic.createIndex();
         $scope.view=model.view;
         $scope.path=model.path;
 
-
+        $scope.testReplaceable=function(){
+            var x=new snippet.ReplaceableObj();
+            x.a={test:'test',idtest:'id1'};
+            x.replace('a', {'id1':12345});
+            x.showObj('a')
+        };
         $scope.evalAssignmentTest=function(){
             model.test={};
             $scope.test=model.test;
@@ -27,9 +32,7 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
         $scope.checkIfPropertyExist=function(){
             console.log(snippet.checkIfPropertyExist([test,"test","test2"]))
         };
-        $scope.getRule=function(){
-            console.log(JSON.stringify(snippet.getRule(test, ["rule","test1","test2"])));
-        };
+
 
         $scope.readModel=function(){
             var modelObj= new model.ModelObj("test.test1.test2|a|b|c");
@@ -49,9 +52,6 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
         };
 
 
-        $scope.testUpdateLocal=function(){
-            localFb.updateLocalFb("path/nonexist1/nonexist2","path.nonexist1.nonexist2", "success");
-        };
         $scope.testFbObj=function(){
             var fbObj=new localFb.FbObj("codingParrot2/$test@main");
             console.log("before ref()",fbObj.path);
@@ -75,6 +75,12 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
                 console.log("success");
             }
             localFb.update("serverList/test@main","path.loadtest", {value:5}, onComplete)
+        };
+
+        $scope.testDriver=function(){
+            model.driverTest={};
+            model.driverTest.test={a:'a',b:'b',c:'c',d:'d'};
+            driver('test',{}).then(function(){console.log('great success')})
         }
     })
     .controller('RouteTestCtrl', function($scope, $route, localFb, model, snippet, config, ROUTES, $location) {

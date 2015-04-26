@@ -23,7 +23,8 @@ angular.module('myApp.config', [])
         fbModelMap:{
             pjList:{},
             pjDetail:{}
-        }
+        },
+        paths:{}
     })
 
     // double check that the app has been configured before running it and blowing up space and time

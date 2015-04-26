@@ -87,9 +87,13 @@ angular.module('core.model', ['firebase', 'myApp.config'])
             }
         }
 
-        function update(path, value) {
+        function update(path, value, valuePathArr) {
             var pathArr=path.split(".");
-            snippet.evalAssignment([model, pathArr], [value]);
+            if(valuePathArr!=undefined) {
+                snippet.evalAssignment([model, pathArr], valuePathArr);
+            } else {
+                snippet.evalAssignment([model, pathArr], [value]);
+            }
             updateView(path)
         }
 
