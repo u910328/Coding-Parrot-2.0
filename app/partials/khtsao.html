@@ -38,20 +38,23 @@
 
     <button ng-click="updateModel()">submit</button>
 
-    <div class="flexbox box-example no-margin">
+    <div ng-repeat="(key,value) in regi.user.info" class="flexbox box-example no-margin">
         <div class="flex-1 padding-5px">
             <h1 class="heading">
-                Details
+               {{value.heading}}
             </h1>
             <form action="#" method="post">
                 <p class="no-margin">
-                    <textarea class="input-text" placeholder="What's up?"></textarea>
+                    <textarea class="input-text" placeholder="What's up?">{{value.detail}}</textarea>
                 </p>
             </form>
         </div>
     </div>
 
-    <button ng-click="updateModel()">Add</button>
+    <button ng-click="add()">Add</button>
+    <button ng-click="delete()">Delete</button>
+
+
 
     <div class="flexbox box-example">
         <div class="project-card">
