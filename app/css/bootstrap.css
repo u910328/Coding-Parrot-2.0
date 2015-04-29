@@ -54,7 +54,13 @@ body{
 
 /*input*/
 
+.test1{
+    background: blue;
+}
 
+.test2{
+    background: red;
+}
 /* common style */
 .form {
     padding: 10px;

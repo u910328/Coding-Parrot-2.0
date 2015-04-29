@@ -106,7 +106,8 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
             model.update("path.path3", $scope.path.path3);
             model.update("path.path4", $scope.path.path4);
             model.update("regi.user.name", $scope.regi.user.name);
-            model.update("regi.user.categories", $scope.regi.user.categories);
+            model.update("regi.user.cate", $scope.regi.user.cate);
+            model.update("regi.user.info", $scope.regi.user.info);
         };
     })
 

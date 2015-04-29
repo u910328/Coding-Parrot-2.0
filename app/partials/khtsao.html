@@ -1,4 +1,6 @@
-
+<div class="{{regi.user.cate}}">
+    <p>test</p>
+</div>
 
 <div class="flexbox flexbox-orient-vertical box-example">
     <h1 class="heading">
@@ -21,11 +23,11 @@
             </h1>
             <form method="post">
                 <p class="no-margin">
-                    <select class="full-width" ng-model="regi.user.categories">
-                        <option value="1">
+                    <select class="full-width" ng-model="regi.user.cate">
+                        <option value="coder-card">
                             Coder
                         </option>
-                        <option value="2">
+                        <option value="pm-card">
                             Project Manager
                         </option>
                     </select>
@@ -49,6 +51,7 @@
         </div>
     </div>
 
+    <button ng-click="updateModel()">Add</button>
 
     <div class="flexbox box-example">
         <div class="project-card">
@@ -94,6 +97,7 @@
                                 <div class="media-body margin-5px">
                                     <h4 class="media-heading">
                                         <p>{{regi.user.name}}</p>
+                                        <p>{{regi.user.cate}}</p>
                                     </h4>
                                 </div>
                                 <div class="btn-group">
@@ -198,7 +202,7 @@
     </div>
 </div>
 <h3>visualLogicTest</h3>
-<p>class1:{{view.class1}},class2:{{view.class2}},class3:{{view.class3}},class4:{{view.class4}}</p> <br>
+<p>class1:{{view.class1}},class2:{{view.class2}},class3:{{view.class3}},class4:{{view.class4}},cate:{{view.cate}}</p> <br>
 <p>path1:{{path.path1}},path2:{{path.path2}},path3:{{path.path3}},path4:{{path.path4}}</p><br>
 <input ng-model="path.path1"><input ng-model="path.path2"><input ng-model="path.path3"><input ng-model="path.path4">
 
