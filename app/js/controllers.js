@@ -95,24 +95,30 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
     })
     .controller('KhtsaoCtrl', function($scope,viewLogic, localFb, model, snippet, config, binder, $location, $routeParams) {
         viewLogic.createIndex();
+        binder.bindScope($scope);
         $scope.view=model.view;
         $scope.path=model.path;
-        $scope.regipage=model.regipage
-        $scope.regi={}
-        $scope.regi.user={}
+        $scope.regipage=model.regipage;
+        $scope.regi={};
+        $scope.regi.user={};
         //$scope.regi.user.info=[{heading:'heading', details:'details'}]
         $scope.regi.user.info={
-            key1:{heading:'heading', details:'details'},
-        }
-        binder.bindScope($scope);
+            key1:{heading:'heading', details:'details'}
+        };
+        $scope.regi.user.cate=[
+            {name:'Coder'},
+            {name:'Project Manager'},
+            {name:'Others'}
+        ];
+
 
         $scope.add=function(){
             $scope.regi.user.info.key3={heading:'heading', details:'details1'}
-        }
+        };
 
         $scope.delete=function(){
             delete $scope.regi.user.info.key3
-        }
+        };
 
 
         $scope.updateModel=function(){
