@@ -23,13 +23,7 @@
             </h1>
             <form method="post">
                 <p class="no-margin">
-                    <select class="full-width" ng-model="regi.user.cate">
-                        <option value="coder-card">
-                            Coder
-                        </option>
-                        <option value="pm-card">
-                            Project Manager
-                        </option>
+                    <select class="full-width" ng-model="selectedCate" ng-options="cate.name for cate in regi.user.cate">
                     </select>
                 </p>
             </form>
@@ -100,7 +94,7 @@
                                 <div class="media-body margin-5px">
                                     <h4 class="media-heading">
                                         <p>{{regi.user.name}}</p>
-                                        <p>{{regi.user.cate}}</p>
+                                        <p>{{selectedCate.name}}</p>
                                     </h4>
                                 </div>
                                 <div class="btn-group">
