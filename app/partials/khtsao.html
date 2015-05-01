@@ -25,6 +25,8 @@
                 <p class="no-margin">
                     <select class="full-width" ng-model="selectedCate" ng-options="cate.name for cate in regi.user.cate">
                     </select>
+                    <select class="full-width" ng-model="selectedCate2" ng-options="coder.name for coder in selectedCate.list">
+                    </select>
                 </p>
             </form>
         </div>
