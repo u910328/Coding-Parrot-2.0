@@ -75,7 +75,7 @@ angular.module('core.model', ['firebase', 'myApp.config'])
                     for(var k=0;k<resultArr.length;k++){
                         finalResult[resultArr[k].split("=")[0]]=resultArr[k].split("=")[1].split("|")[1]
                     }
-                }//TODO:加入不通過時default的處理
+                }
             }
             console.log(JSON.stringify(finalResult));
             return finalResult

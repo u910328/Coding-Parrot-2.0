@@ -102,11 +102,9 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
         $scope.regi={};
         $scope.regi.user={};
         //$scope.regi.user.info=[{heading:'heading', details:'details'}]
-        $scope.regi.user.info={
-            key1:{heading:'heading', details:'details'}
-        };
+        $scope.regi.user.info=[{heading:'heading', details:'details'}];
         $scope.regi.user.cate=[
-            {name:'Coder', list:[{name:'coder name'}]},
+            {name:'Coder', list:[{heading:'coder name'}]},
             {name:'Project Manager'},
             {name:'Others'}
         ];
@@ -114,6 +112,10 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
 
         $scope.add=function(){
             $scope.regi.user.info.key3={heading:'heading', details:'details1'}
+        };
+
+        $scope.addInput=function(){
+            $scope.regi.user.info.push($scope.selectedCate2);
         };
 
         //$scope.add=function(){
