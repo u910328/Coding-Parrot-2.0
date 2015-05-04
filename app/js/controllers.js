@@ -106,7 +106,10 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
         $scope.regi.user.cate=[
             {name:'Coder', list:[{heading:'coder name'},{heading:'others'}]},
             {name:'Project Manager'},
-            {name:'Others'}
+            {name:'Others'};
+        $scope.regi.user.card=[
+            {name:'Coder', list:[{heading:'name'},{details:'details'}]},
+            {name:'Project Manager',list:[{heading:'name'},{details:'details'}]}
         ];
 
 

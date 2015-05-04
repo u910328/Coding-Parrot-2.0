@@ -51,6 +51,21 @@
     <button ng-click="add()">Add</button>
     <button ng-click="delete()">Delete</button>
 
+    <div class="flexbox box-example">
+        <div class="flex-1 padding-5px">
+            <h1 class="heading">
+                Categories
+            </h1>
+            <form method="post">
+                <p class="no-margin">
+                    <select class="full-width" ng-model="CardSelect" ng-options="card.cate for cate in regi.user.card">
+                    </select>
+                    <select class="full-width" ng-model="CardSelect2" ng-options="coder.heading for coder in selectedCate.list">
+                    </select><button ng-click="addInput()">Add</button>
+                </p>
+            </form>
+        </div>
+    </div>
 
 
     <div class="flexbox box-example">
@@ -89,7 +104,7 @@
                                 </p>
                             </li>
                         </ul>
-                        <div class="flexbox card-h100px">
+                        <div ng-repeat="inf in regi.user.info" class="flexbox card-h100px">
                             <div class="media block-update-card">
                                 <a class="pull-left" href="#">
                                     <img class="media-object update-card-MDimentions margin-5px" src="http://3.bp.blogspot.com/-IbEOTNtCMyU/TfCAdHaAxEI/AAAAAAAAA8U/EATib38SSAM/s320/joe-mcelderry.jpg" alt="...">
