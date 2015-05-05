@@ -103,15 +103,12 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
         $scope.regi.user={};
         //$scope.Regi=model.Regi; Then we don't need to use Regi.Cate.XXX structures.
         $scope.Regi=model.Regi;
-        model.Regi={
-            coder:[
-                {heading:'coder name', detail:'coder detail'},
-                {heading:'language', detail:'language'}
-            ],
+        model.Regi.cate=[{name:'Coder'},{name:'PM'}];
+        model.Regi.list={
+            coder:,
             pm:[
                 {heading:'pm name', detail:'pm name'},
-                {heading:'phone', detail:'phone'}
-            ]
+                {heading:'phone', detail:'phone'}]
         };
 
         //$scope.regi.user.info=[{heading:'heading', details:'details'}]

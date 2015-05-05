@@ -22,7 +22,10 @@ angular.module('myApp.config', [])
         //],
         viewLogic:[
            ["Regi.cate","Result"],
-           ["==Coder",[["card.Cate",model.Regi.coder]]],
+           ["==Coder",[["card.Cate",[
+               {heading:'coder name', detail:'coder detail'},
+               {heading:'language', detail:'language'}
+           ]]]],
             ["==PM",[["card.Cate",model.Regi.pm]]]
         ],
 

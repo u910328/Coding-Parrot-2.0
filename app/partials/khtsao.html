@@ -55,7 +55,7 @@
             </h1>
             <form method="post">
                 <p class="no-margin">
-                    <select class="full-width" ng-model="selectedCate" ng-options="cate.name for Card.cate in Regi.user.cate">
+                    <select class="full-width" ng-model="selectedCate" ng-options="cate.name for cate in Regi.cate">
                     </select>
                     </select><button ng-click="addInput()">Add</button>
                 </p>
@@ -65,7 +65,7 @@
 
     <button ng-click="updateModel()">submit</button>
 
-    <div ng-repeat="inf in Regi" class="flexbox box-example no-margin">
+    <div ng-repeat="(key,value) in Regi" class="flexbox box-example no-margin">
         <div class="flex-1 padding-5px">
             <h1 class="heading">
                 {{heading}}
@@ -82,21 +82,7 @@
     <button ng-click="add()">Add</button>
     <button ng-click="delete()">Delete</button>
 
-    <div class="flexbox box-example">
-        <div class="flex-1 padding-5px">
-            <h1 class="heading">
-                Categories
-            </h1>
-            <form method="post">
-                <p class="no-margin">
-                    <select class="full-width" ng-model="CardSelect" ng-options="card.cate for cate in regi.user.card">
-                    </select>
-                    <select class="full-width" ng-model="CardSelect2" ng-options="coder.heading for coder in selectedCate.list">
-                    </select><button ng-click="addInput()">Add</button>
-                </p>
-            </form>
-        </div>
-    </div>
+
 
 
     <div class="flexbox box-example">
