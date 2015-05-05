@@ -101,6 +101,19 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
         $scope.regipage=model.regipage;
         $scope.regi={};
         $scope.regi.user={};
+        //$scope.Regi=model.Regi; Then we don't need to use Regi.Cate.XXX structures.
+        $scope.Regi=model.Regi;
+        model.Regi={
+            coder:[
+                {heading:'coder name', detail:'coder detail'},
+                {heading:'language', detail:'language'}
+            ],
+            pm:[
+                {heading:'pm name', detail:'pm name'},
+                {heading:'phone', detail:'phone'}
+            ]
+        };
+
         //$scope.regi.user.info=[{heading:'heading', details:'details'}]
         $scope.regi.user.info=[{heading:'heading', details:'details'}];
         $scope.regi.user.cate=[
@@ -108,10 +121,7 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
             {name:'Project Manager'},
             {name:'Others'}
         ];
-        $scope.Regi.User.Card=[
-            {name:'Coder', list:[{heading:'Coder Name'},{details:'Details'}]},
-            {name:'Project Manager',list:[{heading:'PM name'},{details:'Details'}]}
-        ];
+
 
 
         $scope.add=function(){

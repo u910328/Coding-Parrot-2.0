@@ -48,6 +48,37 @@
         </div>
     </div>
 
+    <div class="flexbox box-example">
+        <div class="flex-1 padding-5px">
+            <h1 class="heading">
+                Categories
+            </h1>
+            <form method="post">
+                <p class="no-margin">
+                    <select class="full-width" ng-model="selectedCate" ng-options="cate.name for Card.cate in Regi.user.cate">
+                    </select>
+                    </select><button ng-click="addInput()">Add</button>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <button ng-click="updateModel()">submit</button>
+
+    <div ng-repeat="inf in Regi" class="flexbox box-example no-margin">
+        <div class="flex-1 padding-5px">
+            <h1 class="heading">
+                {{heading}}
+            </h1>
+            <button ng-click="deleteInput($index)">X</button>
+            <form action="#" method="post">
+                <p class="no-margin">
+                    <textarea class="input-text" placeholder="What's up?">{{inf.detail}}</textarea>
+                </p>
+            </form>
+        </div>
+    </div>
+
     <button ng-click="add()">Add</button>
     <button ng-click="delete()">Delete</button>
 

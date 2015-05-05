@@ -13,16 +13,19 @@ angular.module('myApp.config', [])
     // your Firebase data URL goes here, no trailing slash
     .constant('FBURL', 'https://cpmain.firebaseio.com')
     .constant('config', {
+        //viewLogic:[
+        //    ["path.path1","path.path2","path.path3","path.path4","result"],
+        //    [">1",">3","==2","==1","view.class1=success1|"],
+        //    ["","","","==3", "view.class2=success2|"],
+        //    ["","","==2","","view.class3=success3|"],
+        //    ["==2","","","","view.class4=success4|"]
+        //],
         viewLogic:[
-            ["path.path1","path.path2","path.path3","path.path4","result"],
-            [">1",">3","==2","==1","view.class1=success1|"],
-            ["","","","==3", "view.class2=success2|"],
-            ["","","==2","","view.class3=success3|"],
-            ["==2","","","","view.class4=success4|"]
+           ["Regi.cate","Result"],
+           ["==Coder",[["card.Cate",model.Regi.coder]]],
+            ["==PM",[["card.Cate",model.Regi.pm]]]
         ],
-        selectCard:[
-           [{heading:'Coder Name'},{details:'Details'}]
-        ],
+
         fbModelMap:{
             pjList:{},
             pjDetail:{}
