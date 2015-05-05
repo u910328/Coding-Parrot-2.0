@@ -20,6 +20,9 @@ angular.module('myApp.config', [])
             ["","","==2","","view.class3=success3|"],
             ["==2","","","","view.class4=success4|"]
         ],
+        selectCard:[
+           [{heading:'Coder Name'},{details:'Details'}]
+        ],
         fbModelMap:{
             pjList:{},
             pjDetail:{}
