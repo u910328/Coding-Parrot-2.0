@@ -45,6 +45,10 @@ angular.module('myApp.routes', ['ngRoute', 'simpleLogin'])
             templateUrl:'partials/khtsao.html',
             controller: 'KhtsaoCtrl'
         },
+        '/khtsao2/:test1/:test2':{
+            templateUrl:'partials/khtsao2.html',
+            controller: 'KhtsaoCtrl2'
+        },
         '/binderTest/id1/:id1/id2/:id2':{
             templateUrl:'partials/binderTest.html',
             controller:'BinderTestCtrl',

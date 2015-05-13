@@ -20,18 +20,20 @@ angular.module('myApp.config', [])
         //    ["","","==2","","view.class3=success3|"],
         //    ["==2","","","","view.class4=success4|"]
         //],
-        viewLogic:[
-           ["Regi.cate","Result"],
-           ["==Coder",[["card.Cate",[
-               {heading:'coder name', detail:'coder detail'},
-               {heading:'language', detail:'language'}
-           ]]]],
-            ["==PM",[["card.Cate",model.Regi.pm]]]
+        viewLogic: [
+            ["Regi.cate", "Result"],
+            ["==Coder", [["card.Cate", [
+                {heading: 'coder name', detail: 'coder detail'},
+                {heading: 'language', detail: 'language'}
+            ]]]],
+            ["==PM", [["card.Cate", [
+                {heading: 'pm name', detail: 'pm detail'}
+            ]]]]
         ],
 
-        fbModelMap:{
-            pjList:{},
-            pjDetail:{}
+        fbModelMap: {
+            pjList: {},
+            pjDetail: {}
         }
     })
 

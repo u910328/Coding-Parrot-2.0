@@ -109,22 +109,6 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
             {name:'Others'}
         ];
 
-        .controller('KhtsaoCtrl2', function($scope,viewLogic, localFb, model, snippet, config, binder, $location, $routeParams) {
-            viewLogic.createIndex();
-            binder.bindScope($scope);
-            $scope.view=model.view;
-            $scope.path=model.path;
-            $scope.regipage=model.regipage;
-            $scope.regi={};
-            $scope.regi.user={};
-            //$scope.regi.user.info=[{heading:'heading', details:'details'}]
-            $scope.regi.user.info=[{heading:'heading', details:'details'}];
-            $scope.regi.user.cate=[
-                {name:'Coder', list:[{heading:'coder name'},{heading:'others'}]},
-                {name:'Project Manager'},
-                {name:'Others'}
-            ];
-
 
         $scope.add=function(){
             $scope.regi.user.info.key3={heading:'heading', details:'details1'}
@@ -151,6 +135,22 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
             model.update("regi.user.cate", $scope.regi.user.cate);
             model.update("regi.user.info", $scope.regi.user.info);
         };
+    })
+    .controller('KhtsaoCtrl2', function($scope,viewLogic, localFb, model, snippet, config, binder, $location, $routeParams) {
+        viewLogic.createIndex();
+        binder.bindScope($scope);
+        $scope.view=model.view;
+        $scope.path=model.path;
+        $scope.regipage=model.regipage;
+        $scope.regi={};
+        $scope.regi.user={};
+        //$scope.regi.user.info=[{heading:'heading', details:'details'}]
+        $scope.regi.user.info=[{heading:'heading', details:'details'}];
+        $scope.regi.user.cate=[
+            {name:'Coder', list:[{heading:'coder name'},{heading:'others'}]},
+            {name:'Project Manager'},
+            {name:'Others'}
+        ];
     })
 
     .controller('ChatCtrl', ['$scope', 'messageList', function($scope, messageList) {
