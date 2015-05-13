@@ -101,16 +101,6 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
         $scope.regipage=model.regipage;
         $scope.regi={};
         $scope.regi.user={};
-        //$scope.Regi=model.Regi; Then we don't need to use Regi.Cate.XXX structures.
-        $scope.Regi=model.Regi;
-        model.Regi.cate=[{name:'Coder'},{name:'PM'}];
-        model.Regi.list={
-            coder:,
-            pm:[
-                {heading:'pm name', detail:'pm name'},
-                {heading:'phone', detail:'phone'}]
-        };
-
         //$scope.regi.user.info=[{heading:'heading', details:'details'}]
         $scope.regi.user.info=[{heading:'heading', details:'details'}];
         $scope.regi.user.cate=[
@@ -119,6 +109,21 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
             {name:'Others'}
         ];
 
+        .controller('KhtsaoCtrl2', function($scope,viewLogic, localFb, model, snippet, config, binder, $location, $routeParams) {
+            viewLogic.createIndex();
+            binder.bindScope($scope);
+            $scope.view=model.view;
+            $scope.path=model.path;
+            $scope.regipage=model.regipage;
+            $scope.regi={};
+            $scope.regi.user={};
+            //$scope.regi.user.info=[{heading:'heading', details:'details'}]
+            $scope.regi.user.info=[{heading:'heading', details:'details'}];
+            $scope.regi.user.cate=[
+                {name:'Coder', list:[{heading:'coder name'},{heading:'others'}]},
+                {name:'Project Manager'},
+                {name:'Others'}
+            ];
 
 
         $scope.add=function(){
@@ -127,11 +132,6 @@ angular.module('myApp.controllers', ['firebase.utils', 'simpleLogin'])
 
         $scope.addInput=function(){
             $scope.regi.user.info.push($scope.selectedCate2);
-        };
-
-        $scope.deleteInput=function(index){
-            console.log(index);
-            $scope.regi.user.info.splice(index,1);
         };
 
         //$scope.add=function(){
